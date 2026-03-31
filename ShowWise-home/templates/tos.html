@@ -1,0 +1,251 @@
+{% extends "base_alt.html" %}
+
+{% block title %}Terms of Service | ShowWise{% endblock %}
+
+{% block head %}
+<style>
+  main { padding: 5rem 2rem !important; max-width: 900px !important; }
+
+  .pp-hero { text-align: center; margin-bottom: 4rem; }
+  .pp-tag {
+    display: inline-block;
+    background: rgba(37,99,235,0.08);
+    border: 1px solid rgba(37,99,235,0.2);
+    color: var(--blue);
+    padding: 0.375rem 1rem;
+    border-radius: 100px;
+    font-size: 0.775rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .pp-hero h1 {
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.04em;
+    margin-bottom: 0.75rem;
+  }
+  .pp-hero p { font-size: 0.9375rem; color: var(--text-muted); }
+
+  .pp-body {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 3rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .pp-body h2 {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.015em;
+    margin-top: 2.5rem;
+    margin-bottom: 0.875rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+  .pp-body h2:first-child { margin-top: 0; }
+  .pp-body h2::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 18px;
+    background: linear-gradient(180deg, var(--blue), var(--teal));
+    border-radius: 2px;
+  }
+  .pp-body p {
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+  .pp-body ul {
+    margin: 0 0 1rem 1.25rem;
+  }
+  .pp-body ul li {
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 0.3rem;
+  }
+  .pp-body a { color: var(--blue); text-decoration: none; font-weight: 500; }
+  .pp-body a:hover { text-decoration: underline; }
+  .pp-body strong { color: var(--text); font-weight: 600; }
+
+  .pp-date {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 2rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .pp-date i { color: var(--blue); }
+
+  .toc {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .toc p {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-subtle);
+    margin-bottom: 0.75rem !important;
+  }
+  .toc ol {
+    margin: 0;
+    padding-left: 1.25rem;
+    columns: 2;
+    column-gap: 2rem;
+  }
+  .toc ol li {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 0.15rem;
+  }
+  .toc ol li a {
+    color: var(--blue);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .toc ol li a:hover { text-decoration: underline; }
+
+  @media (max-width: 768px) {
+    main { padding: 3rem 1.25rem !important; }
+    .pp-body { padding: 2rem 1.5rem; }
+    .toc ol { columns: 1; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="pp-hero">
+  <div class="pp-tag">Legal</div>
+  <h1>Terms of Service</h1>
+  <p>Please read these terms carefully before using ShowWise.</p>
+</div>
+
+<div class="pp-body">
+  <div class="pp-date"><i class="fas fa-calendar-check"></i> Effective Date: 1 June 2025</div>
+
+  <!-- Table of Contents -->
+  <div class="toc">
+    <p>Contents</p>
+    <ol>
+      <li><a href="#acceptance">Acceptance of Terms</a></li>
+      <li><a href="#description">Description of Service</a></li>
+      <li><a href="#accounts">Accounts & Access</a></li>
+      <li><a href="#acceptable-use">Acceptable Use</a></li>
+      <li><a href="#content">Your Content</a></li>
+      <li><a href="#ip">Intellectual Property</a></li>
+      <li><a href="#privacy">Privacy</a></li>
+      <li><a href="#payment">Payment & Billing</a></li>
+      <li><a href="#termination">Termination</a></li>
+      <li><a href="#disclaimers">Disclaimers</a></li>
+      <li><a href="#liability">Limitation of Liability</a></li>
+      <li><a href="#indemnification">Indemnification</a></li>
+      <li><a href="#governing-law">Governing Law</a></li>
+      <li><a href="#changes">Changes to Terms</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ol>
+  </div>
+
+  <h2 id="acceptance">1. Acceptance of Terms</h2>
+  <p>By accessing or using ShowWise (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you are using the Service on behalf of an organisation, you represent and warrant that you have the authority to bind that organisation to these Terms.</p>
+  <p>If you do not agree to these Terms, you must not access or use the Service.</p>
+
+  <h2 id="description">2. Description of Service</h2>
+  <p>ShowWise is a cloud-based production management platform that provides tools for equipment tracking, crew scheduling, event management, real-time collaboration, and related functionality for theatre companies, schools, event teams, and other production organisations.</p>
+  <p>We reserve the right to modify, suspend, or discontinue any aspect of the Service at any time with reasonable notice where practicable.</p>
+
+  <h2 id="accounts">3. Accounts & Access</h2>
+  <p><strong>Account creation.</strong> Accounts are created by authorised organisation administrators. Individual user accounts may only be created via valid invitation links issued by an administrator.</p>
+  <p><strong>Account security.</strong> You are responsible for maintaining the confidentiality of your login credentials. You must notify us immediately at <a href="mailto:support@showwise.app">support@showwise.app</a> if you suspect any unauthorised access to your account.</p>
+  <p><strong>Accurate information.</strong> You agree to provide accurate, current, and complete information when creating your account and to keep that information up to date.</p>
+  <p><strong>Age requirements.</strong> The Service is intended for users aged 13 and older. Users under 13 may only access the Service where the organisation has obtained appropriate parental or guardian consent. Schools are responsible for ensuring compliance with applicable laws regarding minors.</p>
+  <p><strong>One person per account.</strong> Account credentials are for a single named individual and must not be shared with others.</p>
+
+  <h2 id="acceptable-use">4. Acceptable Use</h2>
+  <p>You agree not to use the Service to:</p>
+  <ul>
+    <li>Violate any applicable law, regulation, or third-party rights</li>
+    <li>Upload, transmit, or distribute any content that is unlawful, harmful, defamatory, obscene, or otherwise objectionable</li>
+    <li>Attempt to gain unauthorised access to any part of the Service or its related systems</li>
+    <li>Interfere with or disrupt the integrity or performance of the Service</li>
+    <li>Use automated scripts, bots, or scraping tools to access the Service without our prior written consent</li>
+    <li>Reverse engineer, decompile, or disassemble any part of the Service</li>
+    <li>Use the Service to send unsolicited communications (spam)</li>
+    <li>Impersonate any person or entity, or misrepresent your affiliation with any person or entity</li>
+    <li>Collect or harvest any personally identifiable information from the Service without authorisation</li>
+  </ul>
+  <p>We reserve the right to investigate and take appropriate action against any violation of these terms, including suspending or terminating accounts.</p>
+
+  <h2 id="content">5. Your Content</h2>
+  <p><strong>Ownership.</strong> You retain ownership of all content, data, and information you submit to the Service ("Your Content"), including equipment records, event data, crew information, and files.</p>
+  <p><strong>Licence to us.</strong> By submitting Your Content to the Service, you grant ShowWise a limited, non-exclusive, royalty-free licence to store, process, and display Your Content solely as necessary to provide the Service to you.</p>
+  <p><strong>Your responsibility.</strong> You are solely responsible for Your Content and the consequences of submitting it. You represent and warrant that you have all rights necessary to grant the above licence and that Your Content does not infringe any third-party rights.</p>
+  <p><strong>Data portability.</strong> You may export Your Content at any time using the backup and export tools provided within the Service. On termination, we will make Your Content available for export for a period of 30 days, after which it may be deleted.</p>
+
+  <h2 id="ip">6. Intellectual Property</h2>
+  <p>The Service, including its software, design, text, graphics, logos, and other content created by ShowWise, is owned by ShowWise and protected by applicable intellectual property laws. Nothing in these Terms grants you any right, title, or interest in the Service beyond the limited right to use it as described herein.</p>
+  <p>The ShowWise name, logo, and related marks are trademarks of ShowWise. You may not use them without our prior written consent.</p>
+
+  <h2 id="privacy">7. Privacy</h2>
+  <p>Your use of the Service is also governed by our <a href="/privacy-policy">Privacy Policy</a>, which is incorporated into these Terms by reference. By using the Service, you consent to the collection and use of your information as described in the Privacy Policy.</p>
+
+  <h2 id="payment">8. Payment & Billing</h2>
+  <p><strong>Custom pricing.</strong> ShowWise operates on a custom-deployment model. Pricing is agreed upon between ShowWise and the subscribing organisation prior to deployment, as documented in a separate service agreement or quote.</p>
+  <p><strong>Payment terms.</strong> Payment terms, billing cycles, and accepted payment methods will be set out in your organisation's service agreement. Failure to pay fees when due may result in suspension or termination of your organisation's access.</p>
+  <p><strong>Refunds.</strong> Unless otherwise stated in your service agreement, fees are non-refundable except as required by applicable law.</p>
+  <p><strong>Changes to pricing.</strong> We may change our pricing with at least 30 days' written notice to the billing contact for your organisation.</p>
+
+  <h2 id="termination">9. Termination</h2>
+  <p><strong>By you.</strong> Organisation administrators may terminate their organisation's use of the Service by contacting us at <a href="mailto:support@showwise.app">support@showwise.app</a>. Individual users may have their accounts removed by their organisation administrator.</p>
+  <p><strong>By us.</strong> We may suspend or terminate your access to the Service immediately, without prior notice, if we reasonably believe you have materially breached these Terms, failed to pay amounts due, or if required by law. We will endeavour to give reasonable notice where circumstances allow.</p>
+  <p><strong>Effect of termination.</strong> Upon termination, your right to use the Service ceases immediately. Sections that by their nature should survive termination will remain in effect, including Sections 5, 6, 10, 11, 12, and 13.</p>
+
+  <h2 id="disclaimers">10. Disclaimers</h2>
+  <p>The Service is provided <strong>"as is"</strong> and <strong>"as available"</strong> without warranties of any kind, either express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement.</p>
+  <p>We do not warrant that the Service will be uninterrupted, error-free, or completely secure. We are not responsible for any loss or damage resulting from unauthorised access to your data caused by factors outside our reasonable control.</p>
+
+  <h2 id="liability">11. Limitation of Liability</h2>
+  <p>To the maximum extent permitted by applicable law, ShowWise and its operators, employees, and agents shall not be liable for any indirect, incidental, special, consequential, or punitive damages — including loss of profits, data, goodwill, or other intangible losses — arising out of or in connection with your use of, or inability to use, the Service.</p>
+  <p>Our total aggregate liability to you for any claims arising under or in connection with these Terms shall not exceed the greater of (a) the fees paid by your organisation to us in the 12 months preceding the claim, or (b) AUD $100.</p>
+  <p>Some jurisdictions do not allow the exclusion or limitation of certain warranties or liabilities, so the above limitations may not apply to you in full.</p>
+
+  <h2 id="indemnification">12. Indemnification</h2>
+  <p>You agree to indemnify, defend, and hold harmless ShowWise and its operators, employees, and agents from and against any claims, liabilities, damages, losses, and expenses (including reasonable legal fees) arising out of or in any way connected with your access to or use of the Service, Your Content, or your violation of these Terms.</p>
+
+  <h2 id="governing-law">13. Governing Law</h2>
+  <p>These Terms are governed by and construed in accordance with the laws of the Australian Capital Territory, Australia, without regard to its conflict of law provisions. You agree to submit to the exclusive jurisdiction of the courts located in the Australian Capital Territory for the resolution of any disputes arising from these Terms or your use of the Service.</p>
+
+  <h2 id="changes">14. Changes to Terms</h2>
+  <p>We may update these Terms from time to time. When we do, we will revise the effective date at the top of this page. For material changes, we will provide at least 14 days' notice via email to the billing or administrative contact for your organisation, or by posting a prominent notice within the Service.</p>
+  <p>Your continued use of the Service after changes take effect constitutes your acceptance of the revised Terms. If you do not agree to the updated Terms, you must stop using the Service.</p>
+
+  <h2 id="contact">15. Contact</h2>
+  <p>If you have any questions about these Terms, please contact us:</p>
+  <p>
+    <strong>Email:</strong> <a href="mailto:info@showwise.app">info@showwise.app</a><br>
+    <strong>Support:</strong> <a href="mailto:support@showwise.app">support@showwise.app</a><br>
+    <strong>Website:</strong> <a href="https://showwise.app" target="_blank">https://showwise.app</a>
+  </p>
+</div>
+
+{% endblock %}

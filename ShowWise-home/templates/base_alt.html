@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ── PRIMARY META ── -->
+  <title>{% block title %}ShowWise — Production Management for Theatre & Events{% endblock %}</title>
+  <meta name="description"        content="{% block meta_description %}ShowWise is professional production management software for theatres, schools, studios, and event teams. Streamline scheduling, budgets, and team communication.{% endblock %}">
+  <meta name="keywords"           content="{% block meta_keywords %}production management, theatre management software, event management, show management, school production, studio management, ShowWise{% endblock %}">
+  <meta name="author"             content="ShowWise">
+  <meta name="robots"             content="index, follow">
+  {% if request.path == '/home' %}
+  <link rel="canonical"           href="https://showwise.app/">
+  {% else %}
+  <link rel="canonical"           href="https://showwise.app{{ request.path }}">
+  {% endif %}
+
+  <!-- ── OPEN GRAPH ── -->
+  <meta property="og:type"         content="website">
+  <meta property="og:site_name"    content="ShowWise">
+  {% if request.path == '/home' %}
+  <meta property="og:url"          content="https://showwise.app/">
+  {% else %}
+  <meta property="og:url"          content="https://showwise.app{{ request.path }}">
+  {% endif %}
+  <meta property="og:title"        content="{% block og_title %}ShowWise — Production Management for Theatre & Events{% endblock %}">
+  <meta property="og:description"  content="{% block og_description %}Professional production management for theatres, schools, studios, and event teams. Simplify scheduling, budgets, and team communication.{% endblock %}">
+  <meta property="og:image"        content="{% block og_image %}https://showwise.app/static/og-image.png{% endblock %}">
+  <meta property="og:image:width"  content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale"       content="en_AU">
+
+  <!-- ── TWITTER CARD ── -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        content="@showwiseapp">
+  <meta name="twitter:title"       content="{% block twitter_title %}ShowWise — Production Management for Theatre & Events{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}Professional production management for theatres, schools, studios, and event teams.{% endblock %}">
+  <meta name="twitter:image"       content="{% block twitter_image %}https://showwise.app/static/og-image.png{% endblock %}">
+
+  <!-- ── FAVICON ── -->
+  <link rel="icon" type="image/png" href="/static/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+  <link rel="shortcut icon" href="/static/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="ShowWise" />
+  <link rel="manifest" href="/static/site.webmanifest" />
+  <meta name="theme-color" content="#1c252a">
+
+  <!-- ── SITEMAP ── -->
+  <link rel="sitemap"         type="application/xml" href="/sitemap.xml">
+
+  <!-- ── FONTS & ICONS ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- ── SCHEMA.ORG MICRODATA (JSON-LD) ── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://showwise.app/#organization",
+        "name": "ShowWise",
+        "url": "https://showwise.app/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://showwise.app/static/icon.png",
+          "width": 512,
+          "height": 512
+        },
+        "sameAs": [],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "support@showwise.app",
+          "contactType": "customer support",
+          "areaServed": "AU",
+          "availableLanguage": "English"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://showwise.app/#website",
+        "url": "https://showwise.app/",
+        "name": "ShowWise",
+        "description": "Professional production management software for theatres, schools, studios, and event teams.",
+        "publisher": {
+          "@id": "https://showwise.app/#organization"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://showwise.app/?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://showwise.app{{ request.path }}#webpage",
+        "url": "https://showwise.app{{ request.path }}",
+        "name": "{% block schema_title %}ShowWise — Production Management for Theatre & Events{% endblock %}",
+        "description": "{% block schema_description %}ShowWise is professional production management software for theatres, schools, studios, and event teams.{% endblock %}",
+        "isPartOf": {
+          "@id": "https://showwise.app/#website"
+        },
+        "publisher": {
+          "@id": "https://showwise.app/#organization"
+        }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://showwise.app/#software",
+        "name": "ShowWise",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": "https://showwise.app/",
+        "description": "Professional production management platform for theatres, schools, studios, and event teams. Features equipment tracking, crew scheduling, barcode scanning, and real-time collaboration.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "AUD",
+          "description": "Custom pricing — contact for a quote"
+        },
+        "publisher": {
+          "@id": "https://showwise.app/#organization"
+        }
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --ink: #0c1120;
+      --ink-2: #1a2235;
+      --blue: #2563eb;
+      --blue-mid: #3b82f6;
+      --blue-light: #93c5fd;
+      --teal: #0ea5e9;
+      --surface: #ffffff;
+      --surface-2: #f4f6fb;
+      --surface-3: #eaecf4;
+      --text: #0c1120;
+      --text-muted: #55637a;
+      --text-subtle: #8d9bb0;
+      --border: #dde2ee;
+      --border-2: #c8cfe0;
+      --shadow-sm: 0 1px 3px rgba(12,17,32,0.06), 0 1px 8px rgba(12,17,32,0.04);
+      --shadow-md: 0 4px 16px rgba(12,17,32,0.08), 0 1px 4px rgba(12,17,32,0.04);
+      --shadow-lg: 0 12px 40px rgba(12,17,32,0.12), 0 2px 8px rgba(12,17,32,0.05);
+      --shadow-blue: 0 8px 28px rgba(37,99,235,0.25);
+      --r: 12px;
+      --r-lg: 20px;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--surface-2);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ── */
+    .sw-header {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+    .sw-nav {
+      max-width: 1280px; margin: 0 auto; padding: 0 2rem;
+      height: 64px; display: flex; align-items: center;
+      justify-content: space-between; gap: 1.5rem;
+    }
+    .sw-logo {
+      display: flex; align-items: center; gap: 1px;
+      text-decoration: none; flex-shrink: 0;
+    }
+    .sw-logo img { height: 42px; }
+    .sw-logo-word { font-size: 1.05rem; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+    .sw-nav-center {
+      display: flex; align-items: center; gap: 0.125rem;
+      flex: 1; justify-content: center;
+    }
+    .sw-nav-center a {
+      color: var(--text-muted); text-decoration: none;
+      font-size: 0.875rem; font-weight: 500;
+      padding: 0.4rem 0.875rem; border-radius: 8px;
+      transition: color 0.2s, background 0.2s; white-space: nowrap;
+    }
+    .sw-nav-center a:hover, .sw-nav-center a.active { color: var(--text); background: var(--surface-2); }
+    .sw-nav-center a.active { font-weight: 600; }
+    .sw-nav-right { display: flex; align-items: center; gap: 0.625rem; flex-shrink: 0; }
+
+    .btn-ghost {
+      padding: 0.4375rem 0.875rem; border-radius: 8px;
+      border: 1px solid var(--border-2); background: transparent;
+      color: var(--text-muted); font-size: 0.875rem; font-weight: 500;
+      text-decoration: none; cursor: pointer; transition: all 0.2s;
+      font-family: inherit; display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-ghost:hover { background: var(--surface-2); color: var(--text); border-color: var(--blue); }
+
+    .btn-primary {
+      padding: 0.5rem 1.125rem; border-radius: 8px;
+      background: var(--blue); color: white !important;
+      font-size: 0.875rem; font-weight: 600; text-decoration: none;
+      cursor: pointer; transition: all 0.2s; border: none; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.3); flex-shrink: 0;
+    }
+    .btn-primary:hover { background: #1d4ed8; box-shadow: var(--shadow-blue); transform: translateY(-1px); }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1; padding: 5rem 2rem;
+      max-width: 1280px; margin: 0 auto;
+      width: 100%; box-sizing: border-box;
+    }
+
+    /* ── FOOTER ── */
+    .sw-footer { background: var(--ink); border-top: 1px solid rgba(255,255,255,0.06); margin-top: auto; }
+    .sw-footer-main {
+      max-width: 1280px; margin: 0 auto; padding: 3rem 2rem 2rem;
+      display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 3rem;
+    }
+    .sw-footer-brand .logo-row { display: flex; align-items: center; gap: 1px; margin-bottom: 1rem; }
+    .sw-footer-brand .logo-row span { font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.7); }
+    .sw-footer-brand p { font-size: 0.875rem; color: rgba(255,255,255,0.35); line-height: 1.7; max-width: 240px; }
+    .sw-footer-brand .logo-row img {
+      height: 45px;
+      width: auto;
+    }
+
+    .sw-footer-col h4 {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: rgba(255,255,255,0.45); margin-bottom: 1rem;
+    }
+    .sw-footer-col a {
+      display: block; color: rgba(255,255,255,0.5); text-decoration: none;
+      font-size: 0.875rem; margin-bottom: 0.625rem; transition: color 0.2s;
+    }
+    .sw-footer-col a:hover { color: rgba(255,255,255,0.85); }
+    .sw-footer-bottom {
+      max-width: 1280px; margin: 0 auto; padding: 1.5rem 2rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .sw-footer-bottom p { font-size: 0.8rem; color: rgba(255,255,255,0.25); }
+    .sw-footer-bottom a { color: rgba(255,255,255,0.35); text-decoration: none; }
+    .sw-footer-bottom a:hover { color: rgba(255,255,255,0.6); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) { .sw-footer-main { grid-template-columns: 1fr 1fr; gap: 2rem; } }
+    @media (max-width: 768px) {
+      .sw-nav { padding: 0 1.25rem; }
+      .sw-nav-center { display: none; }
+      main { padding: 3rem 1.25rem; }
+      .sw-footer-main { grid-template-columns: 1fr 1fr; padding: 2rem 1.25rem 1.5rem; }
+      .sw-footer-bottom { padding: 1.25rem; }
+    }
+    @media (max-width: 520px) { .sw-footer-main { grid-template-columns: 1fr; } }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body itemscope itemtype="https://schema.org/WebPage">
+
+  <header class="sw-header" itemscope itemtype="https://schema.org/WPHeader">
+    <nav class="sw-nav" role="navigation" aria-label="Main navigation">
+      <a href="/" class="sw-logo" itemprop="url" aria-label="ShowWise Home">
+        <img src="/static/icon3.png" alt="ShowWise logo" width="42" height="42" itemprop="image" onerror="this.style.display='none'">
+        <span class="sw-logo-word" itemprop="name">ShowWise</span>
+      </a>
+      <div class="sw-nav-center">
+        <a href="/"            {% if request.path == '/' or request.path == '/home' %}class="active"{% endif %}>Home</a>
+        <a href="/learn-more"  {% if request.path == '/learn-more' %}class="active"{% endif %}>Features</a>
+        <a href="/about"       {% if request.path == '/about' %}class="active"{% endif %}>About Us</a>
+        <a href="/quote"       {% if request.path == '/quote' %}class="active"{% endif %}>Pricing</a>
+        <a href="/contact"     {% if request.path == '/contact' %}class="active"{% endif %}>Contact</a>
+      </div>
+      <div class="sw-nav-right">
+        <a href="/contact" class="btn-ghost">Support</a>
+        <a href="/organizations" class="btn-primary"><i class="fas fa-sign-in-alt" aria-hidden="true"></i> Sign In</a>
+      </div>
+    </nav>
+  </header>
+
+  <main itemprop="mainContentOfPage">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="sw-footer" itemscope itemtype="https://schema.org/WPFooter">
+    <div class="sw-footer-main">
+      <div class="sw-footer-brand" itemscope itemtype="https://schema.org/Organization">
+        <div class="logo-row">
+          <img src="/static/icon-dark.png" alt="ShowWise logo" width="45" height="45" itemprop="logo" onerror="this.style.display='none'">
+          <span itemprop="name">ShowWise</span>
+        </div>
+        <p itemprop="description">Professional production management for theatres, schools, studios, and event teams worldwide.</p>
+        <meta itemprop="url" content="https://showwise.app/">
+      </div>
+      <div class="sw-footer-col">
+        <h4>Platform</h4>
+        <a href="/">Home</a>
+        <a href="/learn-more">Features</a>
+        <a href="/organizations">Sign In</a>
+      </div>
+      <div class="sw-footer-col">
+        <h4>Company</h4>
+        <a href="/about">About Us</a>
+        <a href="/quote">Enquire</a>
+        <a href="/contact">Contact</a>
+        <a href="/privacy-policy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+      </div>
+      <div class="sw-footer-col" itemscope itemtype="https://schema.org/ContactPoint">
+        <h4>Support</h4>
+        <a href="mailto:support@showwise.app" itemprop="email">support@showwise.app</a>
+        <a href="mailto:info@showwise.app">info@showwise.app</a>
+        <a href="mailto:bugs@showwise.app">bugs@showwise.app</a>
+        <meta itemprop="contactType" content="customer support">
+      </div>
+    </div>
+    <div class="sw-footer-bottom">
+      <p>&copy; 2026 ShowWise. All rights reserved.</p>
+      <p>Bugs? <a href="mailto:bugs@showwise.app">bugs@showwise.app</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

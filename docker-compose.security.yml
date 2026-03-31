@@ -1,0 +1,161 @@
+# Docker Compose - Production Security Infrastructure
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Security Backend
+  security-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: security_user
+      POSTGRES_PASSWORD: change-me-in-production
+      POSTGRES_DB: security_db
+    volumes:
+      - security_db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U security_user -d security_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Rate Limiting (optional but recommended)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Security Backend Service
+  security-backend:
+    build:
+      context: ./ShowWise-SecurityBackend
+      dockerfile: Dockerfile
+    environment:
+      FLASK_ENV: production
+      SECRET_KEY: ${SECURITY_SECRET_KEY}
+      SECURITY_DATABASE_URL: postgresql://security_user:change-me-in-production@security-db:5432/security_db
+      API_INTEGRATION_KEY: ${API_INTEGRATION_KEY}
+      API_INTEGRATION_SECRET: ${API_INTEGRATION_SECRET}
+      ADMIN_API_KEY: ${ADMIN_API_KEY}
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "5001:5000"
+    depends_on:
+      security-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ShowWise Main App
+  showwise-main:
+    build:
+      context: ./ShowWise
+      dockerfile: Dockerfile
+    environment:
+      FLASK_ENV: production
+      SECRET_KEY: ${SHOWWISE_SECRET_KEY}
+      DATABASE_URL: ${DATABASE_URL}
+      SECURITY_BACKEND_URL: http://security-backend:5000
+      API_INTEGRATION_KEY: ${API_INTEGRATION_KEY}
+      API_INTEGRATION_SECRET: ${API_INTEGRATION_SECRET}
+      APP_INSTANCE_NAME: main
+      CLOUDFLARE_TURNSTILE_SITE_KEY: ${CLOUDFLARE_SITE_KEY}
+      CLOUDFLARE_TURNSTILE_SECRET: ${CLOUDFLARE_SECRET}
+    ports:
+      - "5000:5000"
+    depends_on:
+      security-backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ShowWise Home Page
+  showwise-home:
+    build:
+      context: ./ShowWise-home
+      dockerfile: Dockerfile
+    environment:
+      FLASK_ENV: production
+      SECRET_KEY: ${HOME_SECRET_KEY}
+      SECURITY_BACKEND_URL: http://security-backend:5000
+      API_INTEGRATION_KEY: ${API_INTEGRATION_KEY}
+      API_INTEGRATION_SECRET: ${API_INTEGRATION_SECRET}
+      APP_INSTANCE_NAME: home
+      CLOUDFLARE_TURNSTILE_SITE_KEY: ${CLOUDFLARE_SITE_KEY}
+      CLOUDFLARE_TURNSTILE_SECRET: ${CLOUDFLARE_SECRET}
+    ports:
+      - "5002:5000"
+    depends_on:
+      security-backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ShowWise Backend Service (Original Database Backend)
+  showwise-backend:
+    build:
+      context: ./ShowWise-Backend
+      dockerfile: Dockerfile
+    environment:
+      FLASK_ENV: production
+      SECRET_KEY: ${BACKEND_SECRET_KEY}
+      DATABASE_URL: ${DATABASE_URL}
+      SECURITY_BACKEND_URL: http://security-backend:5000
+      API_INTEGRATION_KEY: ${API_INTEGRATION_KEY}
+      API_INTEGRATION_SECRET: ${API_INTEGRATION_SECRET}
+    ports:
+      - "5003:5000"
+    depends_on:
+      security-backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - security-backend
+      - showwise-main
+      - showwise-home
+      - showwise-backend
+    restart: unless-stopped
+
+volumes:
+  security_db_data:
+
+networks:
+  default:
+    name: showwise-security-network

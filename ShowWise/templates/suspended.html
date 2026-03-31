@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ── PRIMARY META ── -->
+    <title>Service Suspended - ShowWise</title>
+    <meta name="description" content="This ShowWise service has been temporarily suspended.">
+    <meta name="author"      content="ShowWise">
+    <meta name="robots"      content="noindex, nofollow">
+    <!-- ── OPEN GRAPH ── -->
+    <meta property="og:type"        content="website">
+    <meta property="og:site_name"   content="ShowWise">
+    <meta property="og:title"       content="Service Suspended - ShowWise">
+    <meta property="og:description" content="This ShowWise service has been temporarily suspended.">
+    <meta property="og:image"       content="https://showwise.app/static/og-image.png">
+    <meta property="og:locale"      content="en_AU">
+    <!-- ── TWITTER CARD ── -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:site"        content="@showwiseapp">
+    <meta name="twitter:title"       content="Service Suspended - ShowWise">
+    <meta name="twitter:description" content="This ShowWise service has been temporarily suspended.">
+    <meta name="twitter:image"       content="https://showwise.app/static/og-image.png">
+    <!-- ── FAVICON / THEME ── -->
+  <link rel="icon" type="image/png" href="/static/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="/static/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="ShowWise" />
+  <link rel="manifest" href="/static/favicon/site.webmanifest" />
+  <meta name="theme-color" content="#1c252a">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #ef4444;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50%       { transform: scale(1.05); }
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        p {
+            font-size: 1.1rem;
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        
+        .reason {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+        
+        .reason strong {
+            color: #991b1b;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact {
+            font-size: 0.9rem;
+            color: #9ca3af;
+        }
+        
+        .contact strong {
+            color: #6b7280;
+        }
+        
+        .support-link {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .support-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .support-link a:hover {
+            color: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🚫</div>
+        <h1>Service Temporarily Suspended</h1>
+        <p>This service has been temporarily suspended by the administrator.</p>
+        
+        {% if reason %}
+        <div class="reason">
+            <strong>Reason:</strong>
+            {{ reason }}
+        </div>
+        {% endif %}
+        
+        <p class="contact">
+            Please contact support for assistance.<br>
+            <strong>Email:</strong> support@showwise.app
+        </p>
+        
+        <div class="support-link">
+            <a href="javascript:history.back()">← Go Back</a>
+        </div>
+    </div>
+</body>
+</html>

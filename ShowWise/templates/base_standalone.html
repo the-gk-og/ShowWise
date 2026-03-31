@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ── PRIMARY META ── -->
+    <!-- ── PRIMARY META ── -->
+    <title>{% block title %}ShowWise{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}ShowWise — Production Management for Theatre & Events{% endblock %}">
+    <meta name="author"      content="ShowWise">
+    <meta name="robots"      content="noindex, nofollow">
+    <!-- ── OPEN GRAPH ── -->
+    <meta property="og:type"        content="website">
+    <meta property="og:site_name"   content="ShowWise">
+    <meta property="og:title"       content="{% block og_title %}ShowWise — Production Management{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Professional production management for theatres, schools, studios, and event teams.{% endblock %}">
+    <meta property="og:image"       content="https://showwise.app/static/og-image.png">
+    <meta property="og:locale"      content="en_AU">
+    <!-- ── TWITTER CARD ── -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:site"        content="@showwiseapp">
+    <meta name="twitter:title"       content="{% block twitter_title %}ShowWise — Production Management{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Professional production management for theatres, schools, studios, and event teams.{% endblock %}">
+    <meta name="twitter:image"       content="https://showwise.app/static/og-image.png">
+    <!-- ── FAVICON / THEME ── -->
+  <link rel="icon" type="image/png" href="/static/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="/static/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="ShowWise" />
+  <link rel="manifest" href="/static/favicon/site.webmanifest" />
+  <meta name="theme-color" content="#1c252a">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-body, #f9fafb);
+            color: var(--text-primary, #1f2937);
+            min-height: 100vh;
+        }
+        .standalone-header {
+            background: var(--bg-card, #fff);
+            border-bottom: 1px solid var(--border, #e5e7eb);
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .standalone-header .brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary, #1f2937);
+        }
+        .standalone-header .btn-login {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary, #6366f1);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .standalone-header .btn-login:hover {
+            opacity: 0.9;
+        }
+        .standalone-main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem 1.25rem;
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header class="standalone-header">
+        <span class="brand">{% block brand %}{{ organisation_name or 'ShowWise' }}{% endblock %}</span>
+        <a href="{{ login_url }}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Login</a>
+    </header>
+    <main class="standalone-main">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

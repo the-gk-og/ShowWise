@@ -1,0 +1,1040 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - ShowWise{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-cog"></i> Admin Panel</h2>
+    <p style="color: var(--text-secondary); margin-top: 0.5rem;">Manage users, invite codes, database backups, and system settings.</p>
+</div>
+
+<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-bottom: 2rem;">
+    <div class="card" style="text-align: center;">
+        <h3 style="color: var(--primary);">👥</h3>
+        <p id="crewCount" style="font-size: 2rem; font-weight: bold;">0</p>
+        <p>Crew Members</p>
+    </div>
+    <div class="card" style="text-align: center;">
+        <h3 style="color: var(--secondary);">🎭</h3>
+        <p id="castCount" style="font-size: 2rem; font-weight: bold;">0</p>
+        <p>Cast Members</p>
+    </div>
+    <div class="card" style="text-align: center;">
+        <h3 style="color: var(--success);">📦</h3>
+        <p id="equipCount" style="font-size: 2rem; font-weight: bold;">0</p>
+        <p>Equipment Items</p>
+    </div>
+    <div class="card" style="text-align: center;">
+        <h3 style="color: var(--warning);">📅</h3>
+        <p id="eventCount" style="font-size: 2rem; font-weight: bold;">0</p>
+        <p>Events</p>
+    </div>
+</div>
+
+<!-- ==================== USER MANAGEMENT ==================== -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3><i class="fas fa-users"></i> User Management</h3>
+        <div style="display: flex; gap: 0.75rem;">
+            <button onclick="showModal('addCrewModal')" class="btn btn-success"><i class="fas fa-plus"></i> Add User</button>
+        </div>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>2FA</th>
+                <th>Discord</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="usersTableBody">
+            {% for user in users %}
+            <tr>
+                <td><strong>{{ user.username }}</strong></td>
+                <td>{{ user.email or '-' }}</td>
+                <td>
+                    {% if user.is_admin and user.user_role == 'crew' %}
+                    <span style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">Crew/Admin</span>
+                    {% elif user.is_admin and user.user_role == 'staff' %}
+                    <span style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">Staff/Admin</span>
+                    {% elif user.is_admin %}
+                    <span style="background: var(--primary); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">Admin</span>
+                    {% elif user.user_role == 'cast' %}
+                    <span style="background: #fce7f3; color: #9f1239; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">Cast</span>
+                    {% elif user.user_role == 'staff' %}
+                    <span style="background: #fef3c7; color: #78350f; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">Staff</span>
+                    {% else %}
+                    <span style="background: #e5e7eb; color: var(--dark); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">Crew</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.tfa_enabled %}
+                    <span style="color: var(--success); font-size: 0.85rem;"><i class="fas fa-shield-alt"></i> On</span>
+                    {% else %}
+                    <span style="color: var(--text-secondary); font-size: 0.85rem;"><i class="fas fa-shield-alt"></i> Off</span>
+                    {% endif %}
+                    {% if user.force_2fa %}
+                    <span style="background: #fef3c7; color: #78350f; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.75rem; margin-left: 0.25rem;">⚠ Required</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.discord_username %}
+                    <span style="background: #5865f2; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">
+                        <i class="fab fa-discord"></i> {{ user.discord_username }}
+                    </span>
+                    {% else %}
+                    <span style="color: var(--text-secondary);">Not linked</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.created_at }}</td>
+                <td style="white-space: nowrap;">
+                    <button onclick="editUserModal({{ user.id }})" class="btn btn-primary" style="padding: 0.4rem 0.7rem; font-size: 0.8rem;"><i class="fas fa-edit"></i> Edit</button>
+                    {% if not user.force_2fa %}
+                    <button onclick="forceUser2FA({{ user.id }}, '{{ user.username }}')" class="btn" style="padding: 0.4rem 0.7rem; font-size: 0.8rem; background: #fef3c7; color: #78350f; border: 1px solid #fcd34d;" title="Require 2FA on next login"><i class="fas fa-shield-alt"></i> Force 2FA</button>
+                    {% else %}
+                    <button onclick="clearForce2FA({{ user.id }}, '{{ user.username }}')" class="btn" style="padding: 0.4rem 0.7rem; font-size: 0.8rem; background: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db;" title="Clear forced 2FA requirement"><i class="fas fa-times"></i> Clear 2FA</button>
+                    {% endif %}
+                    {% if user.id != current_user.id %}
+                    <button onclick="deleteUser({{ user.id }})" class="btn btn-danger" style="padding: 0.4rem 0.7rem; font-size: 0.8rem;"><i class="fas fa-trash"></i></button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- ==================== INVITE CODES ==================== -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+        <h3><i class="fas fa-ticket-alt"></i> Invite Codes</h3>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <button onclick="showModal('generateInviteModal')" class="btn btn-success"><i class="fas fa-plus"></i> Generate Invite</button>
+            <button onclick="showModal('emailInviteModal')" class="btn btn-primary"><i class="fas fa-envelope"></i> Email Invite</button>
+            <button onclick="showModal('batchEmailModal')" class="btn" style="background: #7c3aed; color: white;"><i class="fas fa-mail-bulk"></i> Batch Email</button>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table id="inviteTable">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Role</th>
+                    <th>Created By</th>
+                    <th>Expires</th>
+                    <th>Status</th>
+                    <th>Used By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="inviteTableBody">
+                <tr><td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ==================== DATABASE MANAGEMENT ==================== -->
+<div class="card">
+    <h3 style="margin-bottom: 1.5rem;"><i class="fas fa-database"></i> Database Management</h3>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div>
+            <h4 style="margin-bottom: 1rem; color: var(--primary);">Backup</h4>
+            <button onclick="createBackup()" class="btn btn-success" style="width: 100%;"><i class="fas fa-download"></i> Create Backup</button>
+        </div>
+        <div>
+            <h4 style="margin-bottom: 1rem; color: var(--secondary);">Restore</h4>
+            <button onclick="showModal('restoreModal')" class="btn btn-primary" style="width: 100%;"><i class="fas fa-upload"></i> Restore Backup</button>
+        </div>
+    </div>
+    
+    <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px;">
+        <h4 style="margin-bottom: 1rem;"><i class="fas fa-history"></i> Recent Backups</h4>
+        <div id="backupsList"><p style="color: var(--text-secondary); text-align: center;">Loading backups...</p></div>
+    </div>
+</div>
+
+<!-- Import Equipment -->
+<div class="card">
+    <h3 style="margin-bottom: 1.5rem;"><i class="fas fa-file-import"></i> Import Equipment</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+        <div>
+            <h4 style="margin-bottom: 1rem; color: var(--primary);">Import from CSV</h4>
+            <form id="csvForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input type="file" id="csvFile" accept=".csv" required>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fas fa-upload"></i> Import CSV</button>
+            </form>
+        </div>
+        <div>
+            <h4 style="margin-bottom: 1rem; color: var(--secondary);">Import from SheetDB</h4>
+            <form id="sheetdbForm">
+                <div class="form-group">
+                    <label>SheetDB ID *</label>
+                    <input type="text" id="sheetId" placeholder="e.g. abc123def456" required>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fas fa-database"></i> Import from Sheet</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Add User Modal -->
+<div id="addCrewModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="hideModal('addCrewModal')">&times;</span>
+        <h2 style="margin-bottom: 1.5rem;">Add User</h2>
+        <form id="addCrewForm">
+            <div class="form-group">
+                <label>Username *</label>
+                <input type="text" id="crewUsername" required>
+            </div>
+            <div class="form-group">
+                <label>Email (Optional)</label>
+                <input type="email" id="crewEmail" placeholder="user@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password *</label>
+                <input type="password" id="crewPassword" required>
+            </div>
+            <div class="form-group">
+                <label>User Role *</label>
+                <select id="userRole" required>
+                    <option value="crew">Crew</option>
+                    <option value="staff">Staff</option>
+                    <option value="cast">Cast</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="checkbox" id="isAdmin" style="width: auto;">
+                    <span>Grant Admin Privileges</span>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fas fa-plus"></i> Create User</button>
+        </form>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div id="editUserModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="hideModal('editUserModal')">&times;</span>
+        <h2 style="margin-bottom: 1.5rem;">Edit User</h2>
+        <form id="editUserForm">
+            <input type="hidden" id="editUserId">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="editUsername" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="editEmail" placeholder="user@example.com">
+            </div>
+            <div class="form-group">
+                <label>User Role *</label>
+                <select id="editUserRole" required>
+                    <option value="crew">Crew</option>
+                    <option value="staff">Staff</option>
+                    <option value="cast">Cast</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="checkbox" id="editIsAdmin" style="width: auto;">
+                    <span>Grant Admin Privileges</span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label>New Password (leave blank to keep current)</label>
+                <input type="password" id="editPassword" placeholder="Min 6 characters">
+            </div>
+            <div style="background: #f0f4ff; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
+                <h4 style="margin-bottom: 1rem; color: var(--primary);">Discord Integration</h4>
+                <div class="form-group">
+                    <label>Discord ID</label>
+                    <input type="text" id="editDiscordId" placeholder="Leave blank to unlink">
+                </div>
+                <div class="form-group">
+                    <label>Discord Username</label>
+                    <input type="text" id="editDiscordUsername" placeholder="e.g., username#1234">
+                </div>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-success" style="flex: 1;"><i class="fas fa-save"></i> Save Changes</button>
+                <button type="button" onclick="hideModal('editUserModal')" class="btn btn-primary" style="flex: 1;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Generate Invite Modal -->
+<div id="generateInviteModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="hideModal('generateInviteModal')">&times;</span>
+        <h2 style="margin-bottom: 1.5rem;"><i class="fas fa-ticket-alt"></i> Generate Invite Code</h2>
+        <form id="generateInviteForm">
+            <div class="form-group">
+                <label>Role for new user *</label>
+                <select id="inviteRole" required>
+                    <option value="crew">Crew</option>
+                    <option value="staff">Staff</option>
+                    <option value="cast">Cast</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Expiry Date *</label>
+                <input type="datetime-local" id="inviteExpiry" required>
+            </div>
+            <div class="form-group">
+                <label>Max Uses</label>
+                <input type="number" id="inviteMaxUses" value="1" min="1" max="100">
+                <small style="color: var(--text-secondary);">Number of times this code can be used</small>
+            </div>
+            <div class="form-group">
+                <label>Note (optional)</label>
+                <input type="text" id="inviteNote" placeholder="e.g. 'For new lighting crew'">
+            </div>
+            <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fas fa-plus"></i> Generate Code</button>
+        </form>
+
+        <div id="generatedInvite" style="display: none; margin-top: 1.5rem; background: #ecfdf5; border: 2px solid var(--success); border-radius: 10px; padding: 1.25rem;">
+            <h4 style="color: var(--success); margin-bottom: 0.75rem;"><i class="fas fa-check-circle"></i> Invite Code Generated!</h4>
+            <div style="display: flex; align-items: center; gap: 0.75rem; background: var(--bg-card); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 0.75rem;">
+                <code id="generatedCode" style="font-size: 1.3rem; letter-spacing: 2px; flex: 1;"></code>
+                <button onclick="copyInviteCode()" class="btn btn-success" style="padding: 0.4rem 0.75rem; font-size: 0.85rem; width: auto;"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <p id="generatedLink" style="margin-bottom: 1rem; font-size: 0.82rem; color: var(--text-secondary); word-break: break-all;"></p>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button onclick="showQRCode()" class="btn" style="flex: 1; background: #1e40af; color: white; width: auto; font-size: 0.9rem; padding: 0.6rem;"><i class="fas fa-qrcode"></i> View QR Code</button>
+                <button onclick="downloadPoster()" class="btn" style="flex: 1; background: #7c3aed; color: white; width: auto; font-size: 0.9rem; padding: 0.6rem;"><i class="fas fa-file-pdf"></i> Download Poster</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div id="qrModal" class="modal">
+    <div class="modal-content" style="max-width: 420px; text-align: center;">
+        <span class="close" onclick="hideModal('qrModal')">&times;</span>
+        <h2 style="margin-bottom: 0.5rem;"><i class="fas fa-qrcode"></i> Invite QR Code</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">Scan to open the signup page with code pre-filled</p>
+        <div id="qrCodeContainer" style="display: flex; justify-content: center; margin-bottom: 1.25rem;">
+            <div id="qrCodeImage" style="padding: 1rem; background: var(--bg-card); border: 2px solid var(--border); border-radius: 12px; display: inline-block;"></div>
+        </div>
+        <code id="qrCodeText" style="display: block; font-size: 1.1rem; letter-spacing: 2px; color: var(--primary); margin-bottom: 1.25rem; font-weight: bold;"></code>
+        <div style="display: flex; gap: 0.75rem;">
+            <button onclick="downloadQR()" class="btn btn-success" style="flex: 1;"><i class="fas fa-download"></i> Download QR</button>
+            <button onclick="downloadPoster()" class="btn" style="flex: 1; background: #7c3aed; color: white;"><i class="fas fa-file-pdf"></i> Download Poster</button>
+        </div>
+    </div>
+</div>
+
+<!-- Email Invite Modal -->
+<div id="emailInviteModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="hideModal('emailInviteModal')">&times;</span>
+        <h2 style="margin-bottom: 1.5rem;"><i class="fas fa-envelope"></i> Send Email Invite</h2>
+        <form id="emailInviteForm">
+            <div class="form-group">
+                <label>Recipient Email *</label>
+                <input type="email" id="inviteEmail" required placeholder="person@example.com">
+            </div>
+            <div class="form-group">
+                <label>Recipient Name (optional)</label>
+                <input type="text" id="inviteName" placeholder="e.g. John Smith">
+            </div>
+            <div class="form-group">
+                <label>Role for new user *</label>
+                <select id="emailInviteRole" required>
+                    <option value="crew">Crew</option>
+                    <option value="staff">Staff</option>
+                    <option value="cast">Cast</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Expiry Date *</label>
+                <input type="datetime-local" id="emailInviteExpiry" required>
+            </div>
+            <div style="background: #f0f4ff; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
+                <p style="font-size: 0.9rem; color: #1e40af; margin: 0;">
+                    <i class="fas fa-info-circle"></i> A personalised invite link is generated and emailed directly — no code typing needed.
+                </p>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;" id="emailInviteBtn">
+                <i class="fas fa-paper-plane"></i> Send Invite Email
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Batch Email Modal -->
+<div id="batchEmailModal" class="modal">
+    <div class="modal-content" style="max-width: 560px;">
+        <span class="close" onclick="hideModal('batchEmailModal')">&times;</span>
+        <h2 style="margin-bottom: 0.5rem;"><i class="fas fa-mail-bulk"></i> Batch Email Invites</h2>
+        <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 0.9rem;">Send individual invite links to multiple people at once. Each person gets their own unique link.</p>
+        <form id="batchEmailForm">
+            <div class="form-group">
+                <label>Email Addresses * <span style="font-weight: 400; color: #6b7280;">(one per line, or comma-separated)</span></label>
+                <textarea id="batchEmails" rows="6" placeholder="john@example.com&#10;jane@example.com, Sarah Smith &lt;sarah@example.com&gt;&#10;crew@theatre.org" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; font-family: inherit; resize: vertical;"></textarea>
+                <small style="color: #6b7280;">Tip: You can use "Name &lt;email@example.com&gt;" format to include names</small>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Role *</label>
+                    <select id="batchRole" required>
+                        <option value="crew">Crew</option>
+                        <option value="staff">Staff</option>
+                        <option value="cast">Cast</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Expiry Date *</label>
+                    <input type="datetime-local" id="batchExpiry" required>
+                </div>
+            </div>
+            <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #f59e0b;">
+                <p style="font-size: 0.88rem; color: #78350f; margin: 0;">
+                    <i class="fas fa-info-circle"></i> Each recipient gets a unique single-use link. Links open the signup page with the code pre-filled — no copy-pasting required.
+                </p>
+            </div>
+            <button type="submit" class="btn" id="batchEmailBtn" style="width: 100%; background: #7c3aed; color: white;">
+                <i class="fas fa-paper-plane"></i> Send Batch Invites
+            </button>
+        </form>
+        <div id="batchResults" style="display: none; margin-top: 1.5rem;"></div>
+    </div>
+</div>
+
+<!-- Restore Modal -->
+<div id="restoreModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="hideModal('restoreModal')">&times;</span>
+        <h2 style="margin-bottom: 1.5rem; color: var(--danger);">⚠️ Restore Database</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; background: var(--bg-nav-hover); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--danger);">
+            <strong>Warning:</strong> This will replace your current database. Current data will be lost!
+        </p>
+        <form id="restoreForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Select Backup File *</label>
+                <input type="file" id="restoreFile" accept=".db" required>
+            </div>
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="checkbox" id="confirmRestore" required>
+                    <span style="color: var(--danger); font-weight: 600;">I understand this will replace my current database</span>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-danger" style="width: 100%;"><i class="fas fa-exclamation-triangle"></i> Restore Database</button>
+        </form>
+    </div>
+</div>
+
+<!-- Hidden PDF poster canvas -->
+<canvas id="posterCanvas" style="display: none;"></canvas>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+// ==================== STATE ====================
+let currentInviteCode = '';
+let currentSignupUrl = '';
+let currentInviteExpiry = null;
+let qrCodeInstance = null;
+
+const SIGNUP_BASE_URL = '{{ config.get("SIGNUP_BASE_URL", "") }}';
+
+// ==================== STATS ====================
+function loadStats() {
+    const allUsers = {{ users|tojson }};
+    document.getElementById('crewCount').textContent = allUsers.filter(u => !u.is_cast).length;
+    document.getElementById('castCount').textContent = allUsers.filter(u => u.is_cast).length;
+}
+
+// ==================== INVITE CODES ====================
+function loadInvites() {
+    fetch('/admin/invites')
+    .then(r => r.json())
+    .then(invites => {
+        const tbody = document.getElementById('inviteTableBody');
+        if (!invites.length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:2rem;">No invite codes yet</td></tr>';
+            return;
+        }
+        tbody.innerHTML = invites.map(inv => {
+            const expired = new Date(inv.expires_at) < new Date();
+            const exhausted = inv.max_uses > 0 && inv.use_count >= inv.max_uses;
+            const valid = !expired && !exhausted && inv.is_active;
+            const statusColor = valid ? 'var(--success)' : '#ef4444';
+            const statusText = !inv.is_active ? 'Revoked' : expired ? 'Expired' : exhausted ? 'Used up' : 'Active';
+            const base = SIGNUP_BASE_URL || window.location.origin;
+            const signupUrl = base + '/signup?invite=' + inv.code;
+            const expiresAtEsc = inv.expires_at.replace(/'/g, "\\'");
+            return `<tr>
+                <td>
+                    <code style="font-size:0.9rem;letter-spacing:1px;">${inv.code}</code>
+                    <button onclick="navigator.clipboard.writeText('${inv.code}')" style="background:none;border:none;cursor:pointer;color:var(--text-secondary);margin-left:4px;" title="Copy code"><i class="fas fa-copy"></i></button>
+                </td>
+                <td><span style="background:var(--bg-nav-hover);padding:0.2rem 0.6rem;border-radius:10px;font-size:0.8rem;">${inv.role}</span></td>
+                <td>${inv.created_by}</td>
+                <td style="font-size:0.85rem;">${new Date(inv.expires_at).toLocaleString()}</td>
+                <td><span style="color:${statusColor};font-weight:600;">${statusText}</span>
+                    <span style="color:var(--text-secondary);font-size:0.8rem;">(${inv.use_count}/${inv.max_uses === 0 ? '∞' : inv.max_uses})</span>
+                </td>
+                <td>${inv.used_by ? inv.used_by.join(', ') : '-'}</td>
+                <td style="white-space:nowrap;">
+                    ${valid ? `
+                    <button onclick="openQRForExisting('${inv.code}', '${signupUrl}', '${expiresAtEsc}')" class="btn" style="padding:0.3rem 0.6rem;font-size:0.8rem;background:#1e40af;color:white;width:auto;margin-bottom:0.25rem;" title="QR Code"><i class="fas fa-qrcode"></i></button>
+                    <button onclick="downloadPosterForCode('${inv.code}', '${signupUrl}', '${expiresAtEsc}')" class="btn" style="padding:0.3rem 0.6rem;font-size:0.8rem;background:#7c3aed;color:white;width:auto;margin-bottom:0.25rem;" title="PDF Poster"><i class="fas fa-file-pdf"></i></button>
+                    <button onclick="revokeInvite(${inv.id})" class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.8rem;width:auto;"><i class="fas fa-ban"></i></button>
+                    ` : ''}
+                    <button onclick="deleteInvite(${inv.id})" class="btn" style="padding:0.3rem 0.6rem;font-size:0.8rem;background:var(--bg-nav-hover);color:var(--text-secondary);width:auto;"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        }).join('');
+    });
+}
+
+// ==================== QR CODE ====================
+function generateQRCode(url, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    qrCodeInstance = null;
+    qrCodeInstance = new QRCode(container, {
+        text: url,
+        width: 220,
+        height: 220,
+        colorDark: '#1f2937',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+    });
+}
+
+function showQRCode() {
+    if (!currentInviteCode) return;
+    document.getElementById('qrCodeText').textContent = currentInviteCode;
+    generateQRCode(currentSignupUrl, 'qrCodeImage');
+    showModal('qrModal');
+}
+
+function openQRForExisting(code, url, expiresAt) {
+    currentInviteCode = code;
+    currentSignupUrl = url;
+    currentInviteExpiry = expiresAt || null;
+    document.getElementById('qrCodeText').textContent = code;
+    generateQRCode(url, 'qrCodeImage');
+    showModal('qrModal');
+}
+
+function downloadQR() {
+    setTimeout(() => {
+        const canvas = document.querySelector('#qrCodeImage canvas');
+        if (!canvas) { showAlert('QR code not ready yet', 'error'); return; }
+        const link = document.createElement('a');
+        link.download = `showwise-invite-${currentInviteCode}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }, 200);
+}
+
+// ==================== PDF POSTER ====================
+function downloadPoster() {
+    if (!currentInviteCode) return;
+    downloadPosterForCode(currentInviteCode, currentSignupUrl, currentInviteExpiry);
+}
+
+function downloadPosterForCode(code, signupUrl, expiresAt) {
+    currentInviteCode = code;
+    currentSignupUrl = signupUrl;
+    currentInviteExpiry = expiresAt || null;
+
+    const tempDiv = document.createElement('div');
+    tempDiv.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
+    document.body.appendChild(tempDiv);
+
+    new QRCode(tempDiv, {
+        text: signupUrl,
+        width: 600,
+        height: 600,
+        colorDark: '#1f2937',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+    });
+
+    setTimeout(() => {
+        const qrCanvas = tempDiv.querySelector('canvas');
+        buildPosterPDF(code, signupUrl, qrCanvas, expiresAt);
+        document.body.removeChild(tempDiv);
+    }, 500);
+}
+
+function buildPosterPDF(code, signupUrl, qrCanvas, expiresAt) {
+    const canvas = document.getElementById('posterCanvas');
+    const W = 2480, H = 3508;
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    const S = W / 794;
+    const sc = n => n * S;
+
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, '#6366f1');
+    grad.addColorStop(1, '#a855f7');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    const cardX = sc(20), cardY = sc(20), cardW = W - sc(40), cardH = H - sc(40);
+    ctx.fillStyle = '#ffffff';
+    roundRect(ctx, cardX, cardY, cardW, cardH, sc(24));
+    ctx.fill();
+
+    ctx.fillStyle = '#1f2937';
+    ctx.textAlign = 'center';
+    ctx.font = `bold ${sc(58)}px system-ui, Arial, sans-serif`;
+    ctx.fillText('Join ShowWise', W / 2, cardY + sc(100));
+
+    ctx.font = `${sc(26)}px system-ui, Arial, sans-serif`;
+    ctx.fillStyle = '#6b7280';
+    ctx.fillText('Scan the QR code or use the invite code below', W / 2, cardY + sc(148));
+
+    ctx.strokeStyle = '#e5e7eb';
+    ctx.lineWidth = sc(2);
+    ctx.beginPath();
+    ctx.moveTo(cardX + sc(60), cardY + sc(170));
+    ctx.lineTo(cardX + cardW - sc(60), cardY + sc(170));
+    ctx.stroke();
+
+    if (qrCanvas) {
+        const qrSize = sc(280);
+        const qrX = (W - qrSize) / 2;
+        const qrY = cardY + sc(195);
+
+        ctx.fillStyle = '#f9fafb';
+        roundRect(ctx, qrX - sc(20), qrY - sc(20), qrSize + sc(40), qrSize + sc(40), sc(16));
+        ctx.fill();
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.lineWidth = sc(2);
+        roundRect(ctx, qrX - sc(20), qrY - sc(20), qrSize + sc(40), qrSize + sc(40), sc(16));
+        ctx.stroke();
+        ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+    }
+
+    ctx.font = `bold ${sc(22)}px system-ui, Arial, sans-serif`;
+    ctx.fillStyle = '#6366f1';
+    ctx.textAlign = 'center';
+    ctx.fillText('📱 Scan to join', W / 2, cardY + sc(195) + sc(280) + sc(55));
+
+    ctx.font = `${sc(16)}px monospace`;
+    ctx.fillStyle = '#9ca3af';
+    ctx.textAlign = 'center';
+    const shortUrl = signupUrl.replace('https://', '').replace('http://', '');
+    ctx.fillText(shortUrl, W / 2, cardY + sc(195) + sc(280) + sc(85));
+
+    const midY = cardY + sc(195) + sc(280) + sc(120);
+    ctx.strokeStyle = '#e5e7eb';
+    ctx.lineWidth = sc(1.5);
+    ctx.setLineDash([sc(6), sc(4)]);
+    ctx.beginPath();
+    ctx.moveTo(cardX + sc(60), midY);
+    ctx.lineTo(cardX + cardW - sc(60), midY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.font = `${sc(18)}px system-ui, Arial, sans-serif`;
+    ctx.fillStyle = '#9ca3af';
+    ctx.fillText("Can't scan? Enter the code manually", W / 2, midY + sc(30));
+
+    const codeBoxY = midY + sc(50);
+    const codeBoxH = sc(90);
+    const codeBoxX = cardX + sc(60);
+    const codeBoxW = cardW - sc(120);
+
+    const codeGrad = ctx.createLinearGradient(codeBoxX, 0, codeBoxX + codeBoxW, 0);
+    codeGrad.addColorStop(0, '#ede9fe');
+    codeGrad.addColorStop(1, '#fce7f3');
+    ctx.fillStyle = codeGrad;
+    roundRect(ctx, codeBoxX, codeBoxY, codeBoxW, codeBoxH, sc(12));
+    ctx.fill();
+
+    ctx.strokeStyle = '#a855f7';
+    ctx.lineWidth = sc(2);
+    roundRect(ctx, codeBoxX, codeBoxY, codeBoxW, codeBoxH, sc(12));
+    ctx.stroke();
+
+    ctx.font = `bold ${sc(46)}px monospace`;
+    ctx.fillStyle = '#4c1d95';
+    ctx.textAlign = 'center';
+    ctx.fillText(code, W / 2, codeBoxY + sc(57));
+
+    ctx.font = `${sc(15)}px system-ui, Arial, sans-serif`;
+    ctx.fillStyle = '#7c3aed';
+    ctx.fillText('INVITE CODE — Use at signup', W / 2, codeBoxY + sc(79));
+
+    if (expiresAt) {
+        const expDate = new Date(expiresAt);
+        const expStr = expDate.toLocaleDateString('en-AU', {
+            day: 'numeric', month: 'long', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+        ctx.font = `${sc(13)}px system-ui, Arial, sans-serif`;
+        ctx.fillStyle = '#d1d5db';
+        ctx.textAlign = 'center';
+        ctx.fillText(`This invite expires ${expStr}`, W / 2, codeBoxY + codeBoxH + sc(28));
+    }
+
+    const footerY = cardY + cardH - sc(30);
+    ctx.font = `${sc(15)}px system-ui, Arial, sans-serif`;
+    ctx.fillStyle = '#9ca3af';
+    ctx.textAlign = 'center';
+    ctx.fillText('ShowWise — Production Crew Management', W / 2, footerY);
+
+    canvas.toBlob(blob => {
+        const link = document.createElement('a');
+        link.download = `showwise-invite-poster-${code}.png`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+    }, 'image/png');
+
+    showAlert('Poster downloaded!', 'success');
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+}
+
+// ==================== ON PAGE LOAD ====================
+window.addEventListener('DOMContentLoaded', () => {
+    const d = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const iso = d.toISOString().slice(0, 16);
+    document.getElementById('inviteExpiry').value = iso;
+    document.getElementById('emailInviteExpiry').value = iso;
+    document.getElementById('batchExpiry').value = iso;
+    loadStats();
+    loadBackups();
+    loadInvites();
+});
+
+// ==================== COPY INVITE CODE ====================
+function copyInviteCode() {
+    navigator.clipboard.writeText(currentInviteCode);
+    showAlert('Code copied!', 'success');
+}
+
+// ==================== REVOKE / DELETE INVITE ====================
+function revokeInvite(id) {
+    if (!confirm('Revoke this invite code?')) return;
+    fetch(`/admin/invites/${id}/revoke`, { method: 'POST' })
+    .then(r => r.json()).then(d => {
+        if (d.success) { showAlert('Invite revoked', 'success'); loadInvites(); }
+        else showAlert(d.error, 'error');
+    });
+}
+
+function deleteInvite(id) {
+    if (!confirm('Delete this invite code?')) return;
+    fetch(`/admin/invites/${id}`, { method: 'DELETE' })
+    .then(r => r.json()).then(d => {
+        if (d.success) { showAlert('Invite deleted', 'success'); loadInvites(); }
+        else showAlert(d.error, 'error');
+    });
+}
+
+// ==================== FORCE 2FA ====================
+function forceUser2FA(userId, username) {
+    if (!confirm(`Require ${username} to set up 2FA on their next login?`)) return;
+    fetch(`/admin/users/${userId}/force-2fa`, { method: 'POST' })
+    .then(r => r.json()).then(d => {
+        if (d.success) { showAlert(`${username} will be required to set up 2FA on next login`, 'success'); setTimeout(() => location.reload(), 1200); }
+        else showAlert(d.error || 'Error', 'error');
+    });
+}
+
+function clearForce2FA(userId, username) {
+    if (!confirm(`Remove the 2FA requirement for ${username}?`)) return;
+    fetch(`/admin/users/${userId}/clear-force-2fa`, { method: 'POST' })
+    .then(r => r.json()).then(d => {
+        if (d.success) { showAlert(`2FA requirement cleared for ${username}`, 'success'); setTimeout(() => location.reload(), 1200); }
+        else showAlert(d.error || 'Error', 'error');
+    });
+}
+
+// ==================== USER CRUD ====================
+function editUserModal(userId) {
+    fetch(`/admin/users/get/${userId}`)
+    .then(r => r.json()).then(user => {
+        document.getElementById('editUserId').value = user.id;
+        document.getElementById('editUsername').value = user.username;
+        document.getElementById('editEmail').value = user.email || '';
+        document.getElementById('editUserRole').value = user.user_role || 'crew';
+        document.getElementById('editIsAdmin').checked = user.is_admin || false;
+        document.getElementById('editDiscordId').value = user.discord_id || '';
+        document.getElementById('editDiscordUsername').value = user.discord_username || '';
+        document.getElementById('editPassword').value = '';
+        showModal('editUserModal');
+    });
+}
+
+function deleteUser(id) {
+    if (!confirm('Delete this user? This cannot be undone.')) return;
+    fetch(`/admin/users/delete/${id}`, { method: 'DELETE' })
+    .then(r => r.json()).then(result => {
+        if (result.success) { showAlert('User deleted', 'success'); setTimeout(() => location.reload(), 1000); }
+        else showAlert(result.error, 'error');
+    });
+}
+
+// ==================== BACKUPS ====================
+function loadBackups() {
+    fetch('/admin/backups').then(r => r.json()).then(backups => {
+        let html = '';
+        if (!backups.length) {
+            html = '<p style="color:var(--text-secondary);text-align:center;">No backups yet</p>';
+        } else {
+            html = '<table style="font-size:0.9rem;"><tbody>';
+            backups.forEach(b => {
+                const date = new Date(b.date);
+                const size = (b.size / 1024 / 1024).toFixed(2);
+                html += `<tr>
+                    <td><strong>${b.name}</strong><br><small style="color:var(--text-secondary);">${size} MB &bull; ${date.toLocaleString()}</small></td>
+                    <td style="text-align:right;"><a href="/admin/download-backup/${b.name}" class="btn btn-primary" style="padding:0.4rem 0.8rem;font-size:0.85rem;width:auto;"><i class="fas fa-download"></i></a></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+        }
+        document.getElementById('backupsList').innerHTML = html;
+    });
+}
+
+function createBackup() {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+    fetch('/admin/backup', { method: 'POST' }).then(r => r.json()).then(result => {
+        if (result.success) { showAlert('Backup created!', 'success'); loadBackups(); }
+        else showAlert('Error creating backup', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-download"></i> Create Backup';
+    });
+}
+
+// ==================== ALL FORM SUBMISSIONS (event delegation) ====================
+document.addEventListener('submit', function(e) {
+    const id = e.target.id;
+
+    if (id === 'addCrewForm') {
+        e.preventDefault();
+        fetch('/admin/users/add', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: document.getElementById('crewUsername').value,
+                email: document.getElementById('crewEmail').value || null,
+                password: document.getElementById('crewPassword').value,
+                is_admin: document.getElementById('isAdmin').checked,
+                user_role: document.getElementById('userRole').value
+            })
+        }).then(r => r.json()).then(result => {
+            if (result.success) { showAlert('User created!', 'success'); setTimeout(() => location.reload(), 1000); }
+            else showAlert(result.error, 'error');
+        });
+    }
+
+    if (id === 'editUserForm') {
+        e.preventDefault();
+        const userId = document.getElementById('editUserId').value;
+        fetch(`/admin/users/edit/${userId}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: document.getElementById('editUsername').value,
+                email: document.getElementById('editEmail').value || null,
+                password: document.getElementById('editPassword').value || null,
+                user_role: document.getElementById('editUserRole').value,
+                is_admin: document.getElementById('editIsAdmin').checked,
+                discord_id: document.getElementById('editDiscordId').value || null,
+                discord_username: document.getElementById('editDiscordUsername').value || null
+            })
+        }).then(r => r.json()).then(result => {
+            if (result.success) { showAlert('User updated!', 'success'); setTimeout(() => location.reload(), 1000); }
+            else showAlert(result.error || 'Error', 'error');
+        });
+    }
+
+    if (id === 'generateInviteForm') {
+        e.preventDefault();
+        fetch('/admin/invites/generate', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                role: document.getElementById('inviteRole').value,
+                expires_at: document.getElementById('inviteExpiry').value,
+                max_uses: parseInt(document.getElementById('inviteMaxUses').value) || 1,
+                note: document.getElementById('inviteNote').value
+            })
+        }).then(r => r.json()).then(d => {
+            if (d.success) {
+                currentInviteCode = d.code;
+                currentInviteExpiry = document.getElementById('inviteExpiry').value;
+                const base = SIGNUP_BASE_URL || window.location.origin;
+                currentSignupUrl = base + '/signup?invite=' + d.code;
+                document.getElementById('generatedCode').textContent = d.code;
+                document.getElementById('generatedLink').textContent = 'Signup link: ' + currentSignupUrl;
+                document.getElementById('generatedInvite').style.display = 'block';
+                loadInvites();
+            } else showAlert(d.error || 'Error', 'error');
+        });
+    }
+
+    if (id === 'emailInviteForm') {
+        e.preventDefault();
+        const btn = document.getElementById('emailInviteBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        fetch('/admin/invites/email', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                email: document.getElementById('inviteEmail').value,
+                name: document.getElementById('inviteName').value,
+                role: document.getElementById('emailInviteRole').value,
+                expires_at: document.getElementById('emailInviteExpiry').value,
+                base_url: SIGNUP_BASE_URL || window.location.origin
+            })
+        }).then(r => r.json()).then(d => {
+            if (d.success) {
+                showAlert('Invite sent to ' + document.getElementById('inviteEmail').value, 'success');
+                hideModal('emailInviteModal');
+                loadInvites();
+            } else showAlert(d.error || 'Failed to send', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Invite Email';
+        });
+    }
+
+    if (id === 'batchEmailForm') {
+        e.preventDefault();
+        const raw = document.getElementById('batchEmails').value.trim();
+        if (!raw) { showAlert('Please enter at least one email address', 'error'); return; }
+        const lines = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+        const parsed = lines.map(line => {
+            const match = line.match(/^(.+?)\s*<([^>]+)>$/);
+            if (match) return { name: match[1].trim(), email: match[2].trim() };
+            return { name: '', email: line };
+        }).filter(entry => entry.email.includes('@'));
+        if (!parsed.length) { showAlert('No valid email addresses found', 'error'); return; }
+        const btn = document.getElementById('batchEmailBtn');
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending 0 / ${parsed.length}...`;
+        let sent = 0, failed = 0;
+        const results = [];
+        const expiresAt = document.getElementById('batchExpiry').value;
+        const role = document.getElementById('batchRole').value;
+        const sendNext = (index) => {
+            if (index >= parsed.length) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Batch Invites';
+                const resultsDiv = document.getElementById('batchResults');
+                resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = `
+                    <div style="background:var(--bg-nav-active);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1rem;">
+                        <strong style="color:var(--success);">✓ Done — ${sent} sent, ${failed} failed</strong>
+                    </div>
+                    ${results.map(r => `
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0.75rem;border-radius:6px;margin-bottom:0.3rem;background:var(--bg-nav-hover);">
+                            <span style="font-size:0.85rem;">${r.email}</span>
+                            <span style="font-size:0.8rem;color:${r.ok ? 'var(--success)' : 'var(--danger)'};">${r.ok ? '✓ Sent' : '✗ ' + r.error}</span>
+                        </div>
+                    `).join('')}`;
+                loadInvites();
+                return;
+            }
+            const person = parsed[index];
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending ${index + 1} / ${parsed.length}...`;
+            fetch('/admin/invites/email', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    email: person.email,
+                    name: person.name,
+                    role,
+                    expires_at: expiresAt,
+                    base_url: SIGNUP_BASE_URL || window.location.origin
+                })
+            }).then(r => r.json()).then(d => {
+                if (d.success) { sent++; results.push({ email: person.email, ok: true }); }
+                else { failed++; results.push({ email: person.email, ok: false, error: d.error || 'Failed' }); }
+                sendNext(index + 1);
+            }).catch(() => {
+                failed++;
+                results.push({ email: person.email, ok: false, error: 'Network error' });
+                sendNext(index + 1);
+            });
+        };
+        sendNext(0);
+    }
+
+    if (id === 'csvForm') {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('file', document.getElementById('csvFile').files[0]);
+        fetch('/equipment/import-csv', { method: 'POST', body: formData })
+        .then(r => r.json()).then(result => {
+            if (result.success) showAlert(`Imported ${result.imported} items!`, 'success');
+            else showAlert(result.error, 'error');
+        });
+    }
+
+    if (id === 'sheetdbForm') {
+        e.preventDefault();
+        fetch('/equipment/import-sheetdb', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ sheet_id: document.getElementById('sheetId').value })
+        }).then(r => r.json()).then(result => {
+            if (result.success) showAlert(`Imported ${result.imported} items!`, 'success');
+            else showAlert(result.error, 'error');
+        });
+    }
+
+    if (id === 'restoreForm') {
+        e.preventDefault();
+        if (!confirm('⚠️ WARNING: This will replace your entire database!\n\nAre you absolutely sure?')) return;
+        const formData = new FormData();
+        formData.append('file', document.getElementById('restoreFile').files[0]);
+        fetch('/admin/restore', { method: 'POST', body: formData })
+        .then(r => r.json()).then(result => {
+            if (result.success) { showAlert(result.message, 'success'); setTimeout(() => location.reload(), 1000); }
+            else showAlert(result.error, 'error');
+        });
+    }
+});
+</script>
+
+{% endblock %}

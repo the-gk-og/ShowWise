@@ -1,0 +1,17 @@
+{
+  "demo": {
+    "name": "Demo Organization",
+    "subdomain": "demo",
+    "url": "https://demo.sfx-crew.com",
+    "logo": "/static/logos/demo.png",
+    "logo_size": "contain",
+    "logo_padding": "12px",
+    "primary_color": "#0051ff",
+    "secondary_color": "#898989",
+    "description": "Demo organization for testing and exploration",
+    "website": "",
+    "created_at": "2026-02-20T09:06:59.515863",
+    "updated_at": "2026-02-20T09:06:59.515880",
+    "active": true
+  }
+}

@@ -1,0 +1,861 @@
+{% extends "base_alt.html" %}
+
+{% block title %}ShowWise — Professional Production Management Platform{% endblock %}
+
+{% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ── RESET MAIN ── */
+main {
+  padding: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  overflow-x: hidden;
+}
+
+/* ── SHARED SECTION HELPERS ── */
+.full-bleed {
+  width: 100%;
+  position: relative;
+}
+
+/* ════════════════════════════════════════════
+   HERO
+════════════════════════════════════════════ */
+.hero {
+  min-height: calc(100svh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #080d1a;
+  padding: 5rem 2rem 4rem;
+}
+
+/* Layered background */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 15% 85%, rgba(37,99,235,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 45% at 85% 10%, rgba(14,165,233,0.14) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 35% at 50% 50%, rgba(99,102,241,0.07) 0%, transparent 60%);
+}
+
+/* Dot-grid overlay */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+
+/* Floating orbs */
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+  animation: orbFloat 12s ease-in-out infinite;
+}
+.hero-orb-1 {
+  width: 480px; height: 480px;
+  background: rgba(37,99,235,0.12);
+  top: -100px; left: -120px;
+  animation-delay: 0s;
+}
+.hero-orb-2 {
+  width: 360px; height: 360px;
+  background: rgba(14,165,233,0.09);
+  bottom: -80px; right: -60px;
+  animation-delay: -5s;
+}
+.hero-orb-3 {
+  width: 220px; height: 220px;
+  background: rgba(139,92,246,0.08);
+  top: 40%; left: 55%;
+  animation-delay: -9s;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(20px, -30px) scale(1.04); }
+  66%       { transform: translate(-15px, 20px) scale(0.97); }
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Badge */
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(37,99,235,0.12);
+  border: 1px solid rgba(37,99,235,0.28);
+  color: #93c5fd;
+  padding: 0.4rem 1rem;
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 1.75rem;
+  animation: fadeUp 0.7s 0.1s ease both;
+}
+.hero-pill-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #3b82f6;
+  box-shadow: 0 0 10px #3b82f6;
+  animation: pulse 2s ease infinite;
+}
+
+/* Headline */
+.hero-h1 {
+  font-size: clamp(2.5rem, 5.5vw, 4.25rem);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+  margin-bottom: 1.375rem;
+  animation: fadeUp 0.7s 0.2s ease both;
+}
+.hero-h1 .grad {
+  background: linear-gradient(125deg, #60a5fa 0%, #38bdf8 45%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Sub */
+.hero-sub {
+  font-size: 1.0625rem;
+  color: rgba(255,255,255,0.52);
+  max-width: 580px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.75;
+  animation: fadeUp 0.7s 0.3s ease both;
+}
+
+/* Buttons */
+.hero-btns {
+  display: flex;
+  gap: 0.875rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+  animation: fadeUp 0.7s 0.4s ease both;
+}
+.btn-hero-primary {
+  padding: 0.875rem 2rem;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.5), 0 6px 22px rgba(37,99,235,0.38);
+  font-family: 'Sora', sans-serif;
+}
+.btn-hero-primary:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.6), 0 10px 30px rgba(37,99,235,0.48);
+}
+.btn-hero-secondary {
+  padding: 0.875rem 2rem;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.8);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.14);
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  backdrop-filter: blur(12px);
+  font-family: 'Sora', sans-serif;
+}
+.btn-hero-secondary:hover {
+  background: rgba(255,255,255,0.11);
+  border-color: rgba(255,255,255,0.28);
+  transform: translateY(-2px);
+}
+
+
+
+/* Scroll indicator */
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.3;
+  animation: fadeUp 1s 1.2s ease both;
+}
+.scroll-hint span { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: white; }
+.scroll-arrow {
+  width: 20px; height: 20px;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: rotate(45deg);
+  animation: scrollBounce 1.5s ease infinite;
+}
+@keyframes scrollBounce {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50%       { transform: rotate(45deg) translateY(5px); }
+}
+
+/* ════════════════════════════════════════════
+   METRICS STRIP
+════════════════════════════════════════════ */
+.metrics {
+  background: #fff;
+  border-bottom: 1px solid #e5e9f4;
+  padding: 0;
+}
+.metrics-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.metric-item {
+  padding: 2.5rem 2rem;
+  text-align: center;
+  border-right: 1px solid #e5e9f4;
+  transition: background 0.2s;
+}
+.metric-item:last-child { border-right: none; }
+.metric-item:hover { background: #f8faff; }
+.metric-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 2.25rem;
+  font-weight: 500;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.metric-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #8d9bb0;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* ════════════════════════════════════════════
+   FEATURES — bento-style grid
+════════════════════════════════════════════ */
+.features-section {
+  background: #f4f6fb;
+  padding: 7rem 2rem;
+}
+.features-inner { max-width: 1280px; margin: 0 auto; }
+
+.section-eyebrow {
+  display: inline-block;
+  background: rgba(37,99,235,0.09);
+  color: #2563eb;
+  padding: 0.45rem 1.1rem;
+  border-radius: 100px;
+  font-size: 0.775rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1.25rem;
+}
+.section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  color: #0c1120;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+.section-desc {
+  font-size: 1.0625rem;
+  color: #55637a;
+  line-height: 1.75;
+  max-width: 580px;
+}
+
+/* Bento grid */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto;
+  gap: 1.25rem;
+  margin-top: 3.5rem;
+}
+
+.bento-card {
+  background: #fff;
+  border: 1px solid #dde2ee;
+  border-radius: 20px;
+  padding: 2rem;
+  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  overflow: hidden;
+}
+.bento-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(37,99,235,0.04), transparent);
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+.bento-card:hover {
+  box-shadow: 0 16px 48px rgba(12,17,32,0.12), 0 2px 8px rgba(12,17,32,0.06);
+  transform: translateY(-4px);
+  border-color: rgba(37,99,235,0.2);
+}
+.bento-card:hover::after { opacity: 1; }
+
+/* Card spans */
+.bento-c1 { grid-column: span 5; }
+.bento-c2 { grid-column: span 7; }
+.bento-c3 { grid-column: span 4; }
+.bento-c4 { grid-column: span 4; }
+.bento-c5 { grid-column: span 4; }
+.bento-c6 { grid-column: span 8; }
+.bento-c7 { grid-column: span 4; }
+
+.bento-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.375rem;
+  color: white;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.28);
+}
+.bento-icon.purple { background: linear-gradient(135deg, #7c3aed, #a855f7); box-shadow: 0 6px 18px rgba(124,58,237,0.28); }
+.bento-icon.teal   { background: linear-gradient(135deg, #0891b2, #06b6d4); box-shadow: 0 6px 18px rgba(8,145,178,0.28); }
+.bento-icon.green  { background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 6px 18px rgba(5,150,105,0.28); }
+.bento-icon.amber  { background: linear-gradient(135deg, #d97706, #f59e0b); box-shadow: 0 6px 18px rgba(217,119,6,0.28); }
+
+.bento-card h3 {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #0c1120;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+.bento-card p {
+  font-size: 0.9rem;
+  color: #55637a;
+  line-height: 1.7;
+}
+.bento-badge {
+  display: inline-block;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: white;
+  padding: 0.15rem 0.55rem;
+  border-radius: 100px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+
+/* Wide card visual mock (barcode scanner card) */
+.bento-scan-demo {
+  margin-top: 1.5rem;
+  background: #f8faff;
+  border: 1px solid #dde2ee;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.scan-bar { width: 3px; height: 40px; background: #2563eb; border-radius: 2px; flex-shrink: 0; }
+.scan-info { flex: 1; }
+.scan-name { font-size: 0.875rem; font-weight: 700; color: #0c1120; }
+.scan-sub  { font-size: 0.75rem; color: #8d9bb0; margin-top: 2px; }
+.scan-tag  { font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 100px; background: #dcfce7; color: #166534; }
+
+/* Calendar mini in second wide card */
+.mini-cal {
+  margin-top: 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+.cal-row {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  background: #f8faff;
+  border: 1px solid #dde2ee;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+}
+.cal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.cal-dot-blue  { background: #2563eb; }
+.cal-dot-teal  { background: #0ea5e9; }
+.cal-dot-green { background: #10b981; }
+.cal-event { font-size: 0.825rem; font-weight: 600; color: #0c1120; flex: 1; }
+.cal-time  { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: #8d9bb0; }
+
+/* ════════════════════════════════════════════
+   USE CASES
+════════════════════════════════════════════ */
+.usecases-section {
+  background: #fff;
+  padding: 7rem 2rem;
+}
+.usecases-inner { max-width: 1280px; margin: 0 auto; }
+
+.usecases-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 3.5rem;
+}
+.uc-card {
+  background: #f4f6fb;
+  border: 1px solid #dde2ee;
+  border-radius: 20px;
+  padding: 2.25rem;
+  transition: all 0.35s;
+  position: relative;
+  overflow: hidden;
+}
+.uc-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #2563eb, #0ea5e9);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s;
+}
+.uc-card:hover {
+  background: #fff;
+  box-shadow: 0 12px 40px rgba(12,17,32,0.1);
+  transform: translateY(-6px);
+  border-color: rgba(37,99,235,0.2);
+}
+.uc-card:hover::before { transform: scaleX(1); }
+.uc-ico {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.28);
+}
+.uc-card h3 { font-size: 1.125rem; font-weight: 800; color: #0c1120; margin-bottom: 0.625rem; letter-spacing: -0.02em; }
+.uc-card p  { font-size: 0.9rem; color: #55637a; line-height: 1.7; }
+
+/* ════════════════════════════════════════════
+   CTA
+════════════════════════════════════════════ */
+.cta-section {
+  background: #f4f6fb;
+  padding: 7rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 800px; height: 400px;
+  background: radial-gradient(ellipse, rgba(37,99,235,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-inner { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; }
+.cta-inner h2 {
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  font-weight: 900;
+  color: #0c1120;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+  margin-bottom: 1.25rem;
+}
+.cta-inner h2 em {
+  font-style: normal;
+  background: linear-gradient(125deg, #2563eb, #0ea5e9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.cta-inner p {
+  font-size: 1.0625rem;
+  color: #55637a;
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+}
+.cta-btns {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn-cta-primary {
+  padding: 1rem 2.25rem;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.3s;
+  box-shadow: 0 6px 24px rgba(37,99,235,0.35);
+  font-family: 'Sora', sans-serif;
+}
+.btn-cta-primary:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(37,99,235,0.45);
+}
+.btn-cta-ghost {
+  padding: 1rem 2.25rem;
+  border-radius: 12px;
+  background: transparent;
+  color: #55637a;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  border: 1.5px solid #c8cfe0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.3s;
+  font-family: 'Sora', sans-serif;
+}
+.btn-cta-ghost:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: rgba(37,99,235,0.04);
+}
+
+/* ════════════════════════════════════════════
+   ANIMATIONS
+════════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+/* Scroll-reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .bento-c1, .bento-c2, .bento-c3, .bento-c4,
+  .bento-c5, .bento-c6, .bento-c7 { grid-column: span 6; }
+  .usecases-grid  { grid-template-columns: repeat(2, 1fr); }
+  .metrics-inner  { grid-template-columns: repeat(2, 1fr); }
+  .metric-item:nth-child(2) { border-right: none; }
+  .metric-item:nth-child(3) { border-top: 1px solid #e5e9f4; }
+  .metric-item:nth-child(4) { border-top: 1px solid #e5e9f4; border-right: none; }
+}
+@media (max-width: 768px) {
+  .hero { padding: 4rem 1.5rem 3rem; min-height: auto; }
+  .hero-h1 { font-size: 2.25rem; }
+  .hero-btns { flex-direction: column; }
+  .btn-hero-primary, .btn-hero-secondary { width: 100%; justify-content: center; }
+  .bento { grid-template-columns: 1fr; }
+  .bento-c1, .bento-c2, .bento-c3, .bento-c4,
+  .bento-c5, .bento-c6, .bento-c7 { grid-column: span 1; }
+  .usecases-grid  { grid-template-columns: 1fr; }
+  .metrics-inner  { grid-template-columns: repeat(2, 1fr); }
+  .features-section, .usecases-section,
+  .cta-section { padding: 4rem 1.5rem; }
+}
+@media (max-width: 480px) {
+  .metrics-inner { grid-template-columns: 1fr; }
+  .metric-item   { border-right: none; border-top: 1px solid #e5e9f4; }
+  .metric-item:first-child { border-top: none; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section class="hero full-bleed">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+
+  <div class="hero-inner">
+    <div class="hero-pill">
+      <span class="hero-pill-dot"></span>
+      Professional Production Management
+    </div>
+
+    <h1 class="hero-h1">
+      Run every show<br>with <span class="grad">confidence</span>
+    </h1>
+
+    <p class="hero-sub">
+      Equipment tracking, crew scheduling, and real-time collaboration — all in one platform built for teams who can't afford to drop the ball.
+    </p>
+
+    <div class="hero-btns">
+      <a href="/quote" class="btn-hero-primary">
+        <i class="fas fa-rocket"></i> Request a Demo
+      </a>
+      <a href="/learn-more" class="btn-hero-secondary">
+        <i class="fas fa-play-circle"></i> Explore Features
+      </a>
+    </div>
+
+
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════ METRICS ═══════════════════ -->
+<section class="metrics full-bleed">
+  <div class="metrics-inner">
+    <div class="metric-item reveal">
+      <div class="metric-val">10×</div>
+      <div class="metric-label">Faster Equipment Lookup</div>
+    </div>
+    <div class="metric-item reveal reveal-delay-1">
+      <div class="metric-val">100%</div>
+      <div class="metric-label">Team Visibility</div>
+    </div>
+    <div class="metric-item reveal reveal-delay-2">
+      <div class="metric-val">Zero</div>
+      <div class="metric-label">Lost Equipment</div>
+    </div>
+    <div class="metric-item reveal reveal-delay-3">
+      <div class="metric-val">24/7</div>
+      <div class="metric-label">Cloud Access</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ FEATURES ═══════════════════ -->
+<section class="features-section full-bleed">
+  <div class="features-inner">
+    <div class="reveal">
+      <div class="section-eyebrow">Core Features</div>
+      <h2 class="section-title">Everything you need,<br>nothing you don't</h2>
+      <p class="section-desc">Powerful tools designed for real production teams — from load-in to load-out.</p>
+    </div>
+
+    <div class="bento">
+
+      <!-- Barcode scanning — wide left -->
+      <div class="bento-card bento-c1 reveal">
+        <div class="bento-icon"><i class="fas fa-barcode"></i></div>
+        <h3>Smart Equipment Tracking</h3>
+        <p>Scan barcodes with any phone camera. Track locations, quantities, and availability in real-time.</p>
+        <div class="bento-scan-demo">
+          <div class="scan-bar"></div>
+          <div class="scan-info">
+            <div class="scan-name">ETC Source Four 750W</div>
+            <div class="scan-sub"><i class="fas fa-box" style="margin-right:4px;"></i>Lighting Store A3 &nbsp;·&nbsp; ×12</div>
+          </div>
+          <div class="scan-tag">In Store</div>
+        </div>
+      </div>
+
+      <!-- Schedule — wide right -->
+      <div class="bento-card bento-c2 reveal reveal-delay-1">
+        <div class="bento-icon teal"><i class="fas fa-calendar-days"></i></div>
+        <h3>Schedule View <span class="bento-badge">New</span></h3>
+        <p>Full-season timeline with Google Calendar two-way sync and smart filtering across all productions.</p>
+        <div class="mini-cal">
+          <div class="cal-row">
+            <div class="cal-dot cal-dot-blue"></div>
+            <div class="cal-event">Hamlet — Load In</div>
+            <div class="cal-time">9:00 AM · Main Stage</div>
+          </div>
+          <div class="cal-row">
+            <div class="cal-dot cal-dot-teal"></div>
+            <div class="cal-event">Tech Rehearsal</div>
+            <div class="cal-time">2:00 PM · Main Stage</div>
+          </div>
+          <div class="cal-row">
+            <div class="cal-dot cal-dot-green"></div>
+            <div class="cal-event">Opening Night</div>
+            <div class="cal-time">7:30 PM · Main Stage</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 small cards -->
+      <div class="bento-card bento-c3 reveal">
+        <div class="bento-icon purple"><i class="fas fa-users"></i></div>
+        <h3>Crew Scheduling</h3>
+        <p>Assign roles, manage availability, and fire automated notifications. Keep everyone on time.</p>
+      </div>
+
+      <div class="bento-card bento-c4 reveal reveal-delay-1">
+        <div class="bento-icon green"><i class="fas fa-list-check"></i></div>
+        <h3>Intelligent Pick Lists</h3>
+        <p>Collaborative checklists linked directly to your equipment database with real-time progress.</p>
+      </div>
+
+      <div class="bento-card bento-c5 reveal reveal-delay-2">
+        <div class="bento-icon amber"><i class="fas fa-file-pdf"></i></div>
+        <h3>PDF Export</h3>
+        <p>Generate professional event briefs with crew lists and pick lists. One click to share.</p>
+      </div>
+
+      <!-- Messaging — wide -->
+      <div class="bento-card bento-c6 reveal">
+        <div class="bento-icon"><i class="fas fa-rocket"></i></div>
+        <h3>Rocket.Chat Integration <span class="bento-badge">New</span></h3>
+        <p>Built-in team messaging with event alerts, crew notifications, and production coordination — all flowing through your ShowWise workspace automatically.</p>
+      </div>
+
+      <!-- Security -->
+      <div class="bento-card bento-c7 reveal reveal-delay-1">
+        <div class="bento-icon purple"><i class="fas fa-key"></i></div>
+        <h3>Security & SSO</h3>
+        <p>OAuth 2.0, two-factor auth, and role-based access. GDPR and FERPA compliant.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ USE CASES ═══════════════════ -->
+<section class="usecases-section full-bleed">
+  <div class="usecases-inner">
+    <div class="reveal">
+      <div class="section-eyebrow">Use Cases</div>
+      <h2 class="section-title">Built for every production team</h2>
+      <p class="section-desc">From school musicals to touring shows — ShowWise adapts to how your team works.</p>
+    </div>
+    <div class="usecases-grid">
+      <div class="uc-card reveal">
+        <div class="uc-ico"><i class="fas fa-school"></i></div>
+        <h3>School Productions</h3>
+        <p>Perfect for theatre departments managing equipment, crew schedules, and student involvement across multiple shows throughout the year.</p>
+      </div>
+      <div class="uc-card reveal reveal-delay-1">
+        <div class="uc-ico" style="background:linear-gradient(135deg,#7c3aed,#a855f7);box-shadow:0 6px 18px rgba(124,58,237,0.28);"><i class="fas fa-building"></i></div>
+        <h3>Theatre Companies</h3>
+        <p>Professional theatres with complex productions and large equipment inventories. Streamline your entire workflow from auditions to closing night.</p>
+      </div>
+      <div class="uc-card reveal reveal-delay-2">
+        <div class="uc-ico" style="background:linear-gradient(135deg,#0891b2,#06b6d4);box-shadow:0 6px 18px rgba(8,145,178,0.28);"><i class="fas fa-calendar-check"></i></div>
+        <h3>Event Planning</h3>
+        <p>Coordinate multiple concurrent events, venues, and crew assignments with tight schedules and complex logistics — all in one place.</p>
+      </div>
+      <div class="uc-card reveal">
+        <div class="uc-ico" style="background:linear-gradient(135deg,#059669,#10b981);box-shadow:0 6px 18px rgba(5,150,105,0.28);"><i class="fas fa-video"></i></div>
+        <h3>Media Studios</h3>
+        <p>Manage equipment, crew schedules, and project coordination across multiple simultaneous shoots without the spreadsheet chaos.</p>
+      </div>
+      <div class="uc-card reveal reveal-delay-1">
+        <div class="uc-ico" style="background:linear-gradient(135deg,#d97706,#f59e0b);box-shadow:0 6px 18px rgba(217,119,6,0.28);"><i class="fas fa-music"></i></div>
+        <h3>Performance Groups</h3>
+        <p>Dance, music, and performance groups coordinating rehearsals, equipment, and production logistics for tours and live shows.</p>
+      </div>
+      <div class="uc-card reveal reveal-delay-2">
+        <div class="uc-ico" style="background:linear-gradient(135deg,#be185d,#ec4899);box-shadow:0 6px 18px rgba(190,24,93,0.28);"><i class="fas fa-broadcast-tower"></i></div>
+        <h3>Broadcasting</h3>
+        <p>Broadcast and streaming organisations managing complex multi-camera productions and technical equipment inventories.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ CTA ═══════════════════ -->
+<section class="cta-section full-bleed">
+  <div class="cta-inner">
+    <div class="reveal">
+      <h2>Ready to <em>take control</em><br>of your production?</h2>
+      <p>Join theatres, schools, and touring companies that trust ShowWise to run their shows. Setup is free — get started today.</p>
+      <div class="cta-btns">
+        <a href="/quote" class="btn-cta-primary">
+          <i class="fas fa-arrow-right"></i> Request Your Free Demo
+        </a>
+        <a href="/learn-more" class="btn-cta-ghost">
+          <i class="fas fa-book-open"></i> Explore Features
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver(
+  (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+  { threshold: 0.12 }
+);
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+{% endblock %}

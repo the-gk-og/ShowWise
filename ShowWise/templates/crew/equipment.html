@@ -1,0 +1,1619 @@
+{% extends "base.html" %}
+{% block title %}Equipment — ShowWise{% endblock %}
+
+{% block content %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --d-font:      'Outfit', sans-serif;
+  --d-mono:      'DM Mono', monospace;
+  --d-bg:        var(--bg-body);
+  --d-surface:   var(--bg-card);
+  --d-surface2:  var(--bg-table-head);
+  --d-border:    var(--border);
+  --d-text:      var(--text-primary);
+  --d-muted:     var(--text-secondary);
+  --d-accent:    #6366f1;
+  --d-amber:     #f59e0b;
+  --d-green:     #10b981;
+  --d-red:       #ef4444;
+  --d-cyan:      #06b6d4;
+  --d-radius:    10px;
+  --d-shadow:    0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+}
+
+/* ═══════════════════════════════════════════
+   PAGE LAYOUT
+═══════════════════════════════════════════ */
+.d-page {
+  font-family: var(--d-font);
+  color: var(--d-text);
+  max-width: 1400px;
+  padding-bottom: 3rem;
+}
+
+/* ── Page header ── */
+.d-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+.d-page-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--d-text);
+  line-height: 1;
+}
+.d-page-title span {
+  color: var(--d-accent);
+}
+.d-page-sub {
+  font-size: 0.875rem;
+  color: var(--d-muted);
+  margin-top: 0.3rem;
+  font-weight: 400;
+}
+
+/* ── Toolbar ── */
+.d-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── Stat chips ── */
+.d-stats {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.d-stat {
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius);
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--d-shadow);
+  flex: 1;
+  min-width: 140px;
+}
+.d-stat-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.d-stat-icon.purple { background: rgba(99,102,241,0.12); }
+.d-stat-icon.amber  { background: rgba(245,158,11,0.12); }
+.d-stat-icon.green  { background: rgba(16,185,129,0.12); }
+.d-stat-icon.cyan   { background: rgba(6,182,212,0.12); }
+.d-stat-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.d-stat-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--d-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 0.1rem;
+}
+
+/* ── Main card ── */
+.d-card {
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  border-radius: 14px;
+  box-shadow: var(--d-shadow);
+  overflow: hidden;
+}
+
+/* ── Search + filter bar inside card ── */
+.d-table-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--d-border);
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--d-surface2);
+}
+.d-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+.d-search-wrap .d-search-icon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%; transform: translateY(-50%);
+  color: var(--d-muted);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+.d-search-input {
+  width: 100%;
+  background: var(--d-surface);
+  border: 1.5px solid var(--d-border);
+  border-radius: 8px;
+  color: var(--d-text);
+  font-family: var(--d-font);
+  font-size: 0.9rem;
+  padding: 0.55rem 0.875rem 0.55rem 2.25rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.d-search-input:focus {
+  border-color: var(--d-accent);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+}
+.d-search-input::placeholder { color: var(--d-muted); }
+
+.d-filter-select {
+  background: var(--d-surface);
+  border: 1.5px solid var(--d-border);
+  border-radius: 8px;
+  color: var(--d-text);
+  font-family: var(--d-font);
+  font-size: 0.875rem;
+  padding: 0.55rem 2rem 0.55rem 0.75rem;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%236b7280' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  transition: border-color 0.15s;
+}
+.d-filter-select:focus { border-color: var(--d-accent); outline: none; }
+
+/* ── Table ── */
+.d-table-wrap {
+  overflow-x: auto;
+}
+.d-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.d-table thead tr {
+  background: var(--d-surface2);
+  border-bottom: 2px solid var(--d-border);
+}
+.d-table th {
+  padding: 0.7rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--d-muted);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  background: var(--d-surface2);
+}
+.d-table th:hover { color: var(--d-accent); }
+.d-table th .sort-icon { margin-left: 0.3rem; opacity: 0.4; font-size: 0.65rem; }
+.d-table th.sorted .sort-icon { opacity: 1; color: var(--d-accent); }
+
+.d-table tbody tr {
+  border-bottom: 1px solid var(--d-border);
+  transition: background 0.1s;
+}
+.d-table tbody tr:last-child { border-bottom: none; }
+.d-table tbody tr:hover { background: var(--bg-table-hover); }
+
+.d-table td {
+  padding: 0.75rem 1rem;
+  color: var(--d-text);
+  vertical-align: middle;
+}
+
+/* Thumb cell */
+.d-thumb {
+  width: 44px; height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1.5px solid var(--d-border);
+  display: block;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.d-thumb:hover { transform: scale(1.08); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.d-thumb-placeholder {
+  width: 44px; height: 44px;
+  border-radius: 8px;
+  background: var(--d-surface2);
+  border: 1.5px solid var(--d-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+}
+
+/* Name link */
+.d-item-name {
+  font-weight: 600;
+  color: var(--d-text);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.d-item-name:hover { color: var(--d-accent); }
+
+/* Barcode */
+.d-barcode {
+  font-family: var(--d-mono);
+  font-size: 0.78rem;
+  color: var(--d-muted);
+  background: var(--d-surface2);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--d-border);
+}
+
+/* Category pill */
+.d-cat-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(99,102,241,0.1);
+  color: var(--d-accent);
+  border: 1px solid rgba(99,102,241,0.2);
+  white-space: nowrap;
+}
+
+/* Location */
+.d-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--d-amber);
+  font-weight: 500;
+}
+
+/* Qty badge */
+.d-qty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 24px;
+  border-radius: 6px;
+  font-family: var(--d-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  background: var(--d-surface2);
+  border: 1px solid var(--d-border);
+  color: var(--d-text);
+}
+
+/* Row actions */
+.d-row-actions {
+  display: flex;
+  gap: 0.3rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.d-table tbody tr:hover .d-row-actions { opacity: 1; }
+.d-row-btn {
+  width: 30px; height: 30px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem;
+  transition: background 0.1s, transform 0.1s;
+}
+.d-row-btn:active { transform: scale(0.92); }
+.d-row-btn.edit   { background: rgba(99,102,241,0.1); color: var(--d-accent); }
+.d-row-btn.photo  { background: rgba(6,182,212,0.1);  color: var(--d-cyan); }
+.d-row-btn.locpic { background: rgba(245,158,11,0.1); color: var(--d-amber); }
+.d-row-btn.del    { background: rgba(239,68,68,0.1);  color: var(--d-red); }
+.d-row-btn:hover  { filter: brightness(1.2); }
+
+/* ── Pagination ── */
+.d-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1.25rem;
+  border-top: 1px solid var(--d-border);
+  background: var(--d-surface2);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.d-page-info {
+  font-size: 0.82rem;
+  color: var(--d-muted);
+  font-family: var(--d-mono);
+}
+.d-page-info b { color: var(--d-text); }
+.d-page-btns {
+  display: flex;
+  gap: 0.25rem;
+}
+.d-page-btn {
+  width: 32px; height: 32px;
+  border: 1.5px solid var(--d-border);
+  border-radius: 6px;
+  background: var(--d-surface);
+  color: var(--d-text);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem;
+  font-family: var(--d-mono);
+  transition: all 0.15s;
+}
+.d-page-btn:hover  { border-color: var(--d-accent); color: var(--d-accent); }
+.d-page-btn.active { background: var(--d-accent); border-color: var(--d-accent); color: #fff; }
+.d-page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ── Buttons (toolbar) ── */
+.d-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--d-font);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.d-btn:active { transform: scale(0.97); }
+.d-btn-primary { background: var(--d-accent); color: #fff; }
+.d-btn-primary:hover { filter: brightness(1.1); }
+.d-btn-ghost {
+  background: var(--d-surface);
+  color: var(--d-text);
+  border: 1.5px solid var(--d-border);
+}
+.d-btn-ghost:hover { border-color: var(--d-accent); color: var(--d-accent); }
+.d-btn-amber { background: rgba(245,158,11,0.12); color: var(--d-amber); border: 1.5px solid rgba(245,158,11,0.25); }
+.d-btn-amber:hover { background: rgba(245,158,11,0.2); }
+.d-btn-green { background: rgba(16,185,129,0.12); color: var(--d-green); border: 1.5px solid rgba(16,185,129,0.25); }
+.d-btn-green:hover { background: rgba(16,185,129,0.2); }
+.d-btn-cyan  { background: rgba(6,182,212,0.12); color: var(--d-cyan); border: 1.5px solid rgba(6,182,212,0.25); }
+.d-btn-cyan:hover { background: rgba(6,182,212,0.2); }
+.d-btn-sm { padding: 0.4rem 0.75rem; font-size: 0.8rem; }
+
+/* ── Import status ── */
+.d-import-status {
+  display: none;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Empty state ── */
+.d-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--d-muted);
+}
+.d-empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+.d-empty h3 { font-size: 1.2rem; font-weight: 700; color: var(--d-text); margin-bottom: 0.4rem; }
+
+/* ═══════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════ */
+.d-modal {
+  display: none;
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+}
+.d-modal.open { display: flex; animation: dModalIn 0.2s ease; }
+@keyframes dModalIn { from { opacity: 0; } to { opacity: 1; } }
+
+.d-modal-box {
+  position: relative;
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: dBoxIn 0.2s ease;
+}
+@keyframes dBoxIn { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.d-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 1.25rem 1.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--d-surface);
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--d-border);
+  margin-bottom: 0;
+}
+.d-modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.d-modal-close {
+  width: 32px; height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: var(--d-surface2);
+  color: var(--d-muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.d-modal-close:hover { background: rgba(239,68,68,0.1); color: var(--d-red); }
+
+.d-modal-body { padding: 1.25rem 1.5rem 1.5rem; }
+
+.d-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.d-form-group { margin-bottom: 1rem; }
+.d-form-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--d-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.4rem;
+}
+.d-form-input, .d-form-textarea {
+  width: 100%;
+  background: var(--d-surface2);
+  border: 1.5px solid var(--d-border);
+  border-radius: 8px;
+  color: var(--d-text);
+  font-family: var(--d-font);
+  font-size: 0.9rem;
+  padding: 0.6rem 0.875rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.d-form-input:focus, .d-form-textarea:focus {
+  border-color: var(--d-accent);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+.d-form-input::placeholder, .d-form-textarea::placeholder { color: var(--d-muted); }
+.d-form-textarea { resize: vertical; min-height: 80px; }
+
+/* Photo upload area */
+.d-upload-area {
+  border: 2px dashed var(--d-border);
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.d-upload-area:hover { border-color: var(--d-accent); background: rgba(99,102,241,0.03); }
+.d-upload-area p { color: var(--d-muted); font-size: 0.875rem; margin-top: 0.5rem; }
+
+/* Scan modal */
+.d-scan-viewport {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid var(--d-border);
+  background: #000;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0.875rem;
+  min-height: 200px;
+}
+.d-scan-viewport video, .d-scan-viewport canvas { width: 100% !important; display: block; }
+#scanViewport > div { max-height: 100%; overflow: hidden; }
+
+.d-scan-reticle-wrap {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.d-scan-reticle {
+  width: 260px; height: 80px;
+  border: 2px solid var(--d-accent);
+  border-radius: 6px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.4);
+  position: relative;
+  animation: reticlePulse 2s ease-in-out infinite;
+}
+@keyframes reticlePulse {
+  0%,100% { border-color: var(--d-accent); }
+  50%      { border-color: var(--d-cyan); }
+}
+.d-scan-line {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--d-cyan), transparent);
+  animation: scanSweep 1.4s linear infinite;
+}
+@keyframes scanSweep { 0% { top: 0; } 100% { top: 100%; } }
+
+.d-scan-result {
+  background: var(--d-surface2);
+  border: 1.5px solid var(--d-accent);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 0.875rem;
+  animation: slideIn 0.2s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.d-scan-result-name { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+.d-scan-result-loc {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  background: rgba(245,158,11,0.15);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--d-amber);
+  margin-bottom: 0.75rem;
+}
+
+/* Toast */
+.d-toast {
+  position: fixed;
+  bottom: 2rem; right: 2rem; z-index: 9000;
+  background: var(--d-surface);
+  border: 1.5px solid var(--d-border);
+  border-radius: 10px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  display: flex; align-items: center; gap: 0.6rem;
+  animation: toastIn 0.2s ease;
+  max-width: 320px;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.d-toast.success { border-color: rgba(16,185,129,0.5); }
+.d-toast.error   { border-color: rgba(239,68,68,0.5); }
+.d-toast-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.d-toast.success .d-toast-dot { background: var(--d-green); }
+.d-toast.error   .d-toast-dot { background: var(--d-red); }
+</style>
+
+<div class="d-page">
+
+  <!-- Page header -->
+  <div class="d-page-header">
+    <div>
+      <h1 class="d-page-title">Equipment <span>Inventory</span></h1>
+      <p class="d-page-sub">Manage gear, track locations, and generate barcodes</p>
+    </div>
+    <div class="d-toolbar">
+      <button onclick="openScanModal()" class="d-btn d-btn-cyan">
+        <i class="fas fa-barcode"></i> Scan
+      </button>
+      <button onclick="downloadCSVTemplate()" class="d-btn d-btn-ghost">
+        <i class="fas fa-download"></i> Template
+      </button>
+      {% if current_user.is_admin %}
+      <label class="d-btn d-btn-ghost" style="cursor:pointer;">
+        <i class="fas fa-file-upload"></i> Import CSV
+        <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="importCSV(this)">
+      </label>
+      <button onclick="exportCSV()" class="d-btn d-btn-green">
+        <i class="fas fa-file-download"></i> Export
+      </button>
+      <a href="{{ url_for('equipment.barcode_page') }}" class="d-btn d-btn-amber">
+        <i class="fas fa-qrcode"></i> QR Codes
+      </a>
+      <button onclick="openAddModal()" class="d-btn d-btn-primary">
+        <i class="fas fa-plus"></i> Add Item
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Import status -->
+  <div id="importStatus" class="d-import-status"></div>
+
+  <!-- Stats row -->
+  <div class="d-stats" id="statsRow">
+    <div class="d-stat">
+      <div class="d-stat-icon purple">📦</div>
+      <div>
+        <div class="d-stat-val" id="statTotal">{{ equipment|length }}</div>
+        <div class="d-stat-label">Total Items</div>
+      </div>
+    </div>
+    <div class="d-stat">
+      <div class="d-stat-icon amber">🗂️</div>
+      <div>
+        <div class="d-stat-val" id="statCats">—</div>
+        <div class="d-stat-label">Categories</div>
+      </div>
+    </div>
+    <div class="d-stat">
+      <div class="d-stat-icon green">📊</div>
+      <div>
+        <div class="d-stat-val" id="statQty">—</div>
+        <div class="d-stat-label">Total Units</div>
+      </div>
+    </div>
+    <div class="d-stat">
+      <div class="d-stat-icon cyan">📍</div>
+      <div>
+        <div class="d-stat-val" id="statLocs">—</div>
+        <div class="d-stat-label">Locations</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main table card -->
+  <div class="d-card">
+    <!-- Search + filters -->
+    <div class="d-table-header">
+      <div class="d-search-wrap">
+        <i class="fas fa-search d-search-icon"></i>
+        <input type="text" id="desktopSearch" class="d-search-input"
+               placeholder="Search by name, barcode, category, location…">
+      </div>
+      <select id="catFilter" class="d-filter-select" onchange="applyFilters()">
+        <option value="">All Categories</option>
+      </select>
+      <select id="locFilter" class="d-filter-select" onchange="applyFilters()">
+        <option value="">All Locations</option>
+      </select>
+      <select id="pageSizeSelect" class="d-filter-select" onchange="setPageSize(this.value)">
+        <option value="25">25 / page</option>
+        <option value="50">50 / page</option>
+        <option value="100">100 / page</option>
+        <option value="9999">All</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="d-table-wrap">
+      <table class="d-table" id="equipTable">
+        <thead>
+          <tr>
+            <th style="width:52px;"></th>
+            <th onclick="sortBy('name')" data-col="name">Name <span class="sort-icon">⇅</span></th>
+            <th onclick="sortBy('barcode')" data-col="barcode">Barcode <span class="sort-icon">⇅</span></th>
+            <th onclick="sortBy('quantity_owned')" data-col="quantity_owned">Qty <span class="sort-icon">⇅</span></th>
+            <th onclick="sortBy('category')" data-col="category">Category <span class="sort-icon">⇅</span></th>
+            <th onclick="sortBy('location')" data-col="location">Location <span class="sort-icon">⇅</span></th>
+            <th>Notes</th>
+            {% if current_user.is_admin %}<th style="width:130px;">Actions</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody id="equipTbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Empty -->
+    <div class="d-empty" id="dEmpty" style="display:none;">
+      <div class="d-empty-icon">🔍</div>
+      <h3>No items match your search</h3>
+      <p>Try a different search or filter.</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-pagination" id="dPagination">
+      <div class="d-page-info" id="dPageInfo"></div>
+      <div class="d-page-btns" id="dPageBtns"></div>
+    </div>
+  </div>
+
+</div><!-- .d-page -->
+
+
+<!-- ══════════ ADD / EDIT MODAL ══════════ -->
+{% if current_user.is_admin %}
+<div class="d-modal" id="addModal">
+  <div class="d-modal-box">
+    <div class="d-modal-header">
+      <div class="d-modal-title" id="addModalTitle">Add Equipment</div>
+      <button class="d-modal-close" onclick="closeModal('addModal')">✕</button>
+    </div>
+    <div class="d-modal-body">
+      <input type="hidden" id="editId">
+      <div class="d-form-row">
+        <div class="d-form-group">
+          <label>Barcode *</label>
+          <input type="text" id="fBarcode" class="d-form-input" placeholder="EQ-001">
+        </div>
+        <div class="d-form-group">
+          <label>Quantity Owned</label>
+          <input type="number" id="fQty" class="d-form-input" value="1" min="1">
+        </div>
+      </div>
+      <div class="d-form-group">
+        <label>Name *</label>
+        <input type="text" id="fName" class="d-form-input" placeholder="e.g. 20m XLR Cable">
+      </div>
+      <div class="d-form-row">
+        <div class="d-form-group">
+          <label>Category</label>
+          <input type="text" id="fCat" class="d-form-input" placeholder="e.g. Audio, Lighting">
+        </div>
+        <div class="d-form-group">
+          <label>Storage Location</label>
+          <input type="text" id="fLoc" class="d-form-input" placeholder="e.g. Rack A, Shelf 3">
+        </div>
+      </div>
+      <div class="d-form-group">
+        <label>Notes</label>
+        <textarea id="fNotes" class="d-form-textarea" placeholder="Optional notes…"></textarea>
+      </div>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.25rem;">
+        <button onclick="closeModal('addModal')" class="d-btn d-btn-ghost">Cancel</button>
+        <button onclick="submitEquipment()" class="d-btn d-btn-primary">
+          <i class="fas fa-save"></i> Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PHOTO MODAL ══════════ -->
+<div class="d-modal" id="photoModal">
+  <div class="d-modal-box" style="max-width:440px;">
+    <div class="d-modal-header">
+      <div class="d-modal-title" id="photoModalTitle">Equipment Photo</div>
+      <button class="d-modal-close" onclick="closeModal('photoModal')">✕</button>
+    </div>
+    <div class="d-modal-body">
+      <div id="photoCurrentWrap" style="display:none;margin-bottom:1rem;text-align:center;">
+        <img id="photoCurrentImg" src="" alt=""
+             style="max-width:100%;max-height:200px;border-radius:10px;border:1.5px solid var(--d-border);object-fit:contain;">
+        <br>
+        <button onclick="deletePhoto()" class="d-btn d-btn-ghost" style="margin-top:0.75rem;color:var(--d-red);border-color:rgba(239,68,68,0.3);">
+          <i class="fas fa-trash"></i> Remove
+        </button>
+      </div>
+      <div class="d-upload-area" onclick="document.getElementById('photoFileInput').click()"
+           ondragover="event.preventDefault();this.style.borderColor='var(--d-accent)'"
+           ondragleave="this.style.borderColor='var(--d-border)'"
+           ondrop="handlePhotoDrop(event)">
+        <div style="font-size:2rem;" id="photoUploadIcon">📷</div>
+        <p>Click or drag &amp; drop to upload</p>
+        <p style="font-size:0.75rem;margin-top:0.2rem;">PNG, JPG, WEBP, GIF</p>
+      </div>
+      <input type="file" id="photoFileInput" accept="image/*" style="display:none;" onchange="uploadPhoto(this.files[0])">
+      <div id="photoProgress" style="display:none;margin-top:0.75rem;text-align:center;color:var(--d-muted);font-size:0.85rem;">
+        <i class="fas fa-spinner fa-spin"></i> Uploading…
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════ SCAN MODAL ══════════ -->
+<style>
+.scan-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+@media (max-width: 640px) {
+  .scan-layout { grid-template-columns: 1fr; }
+}
+
+/* ── Left: camera column ── */
+.scan-cam-col {}
+
+/* ── Right: result column ── */
+.scan-result-col {
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+}
+
+.scan-idle-msg {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--d-muted);
+  padding: 2rem 1rem;
+  border: 2px dashed var(--d-border);
+  border-radius: 10px;
+  font-size: 0.875rem;
+  gap: 0.5rem;
+}
+.scan-idle-msg .idle-icon { font-size: 2.5rem; }
+
+/* ── Item result card ── */
+.scan-item-card {
+  background: var(--d-surface2);
+  border: 2px solid var(--d-accent);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: scanCardIn 0.2s ease;
+}
+@keyframes scanCardIn {
+  from { opacity:0; transform: translateY(6px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+.scan-item-photo {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.scan-item-photo:hover { opacity: 0.9; }
+
+.scan-item-photo-placeholder {
+  width: 100%; height: 140px;
+  background: var(--d-surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem;
+  border-bottom: 1px solid var(--d-border);
+}
+
+.scan-item-body {
+  padding: 0.875rem;
+}
+
+.scan-item-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--d-text);
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.scan-item-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.6rem;
+}
+.scan-chip {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid;
+}
+.scan-chip-cat  { background: rgba(99,102,241,0.1); color: var(--d-accent); border-color: rgba(99,102,241,0.25); }
+.scan-chip-loc  { background: rgba(245,158,11,0.1); color: var(--d-amber);  border-color: rgba(245,158,11,0.25); }
+.scan-chip-qty  { background: rgba(16,185,129,0.1); color: var(--d-green);  border-color: rgba(16,185,129,0.25); }
+
+.scan-item-desc {
+  font-size: 0.82rem;
+  color: var(--d-muted);
+  line-height: 1.5;
+  margin-bottom: 0.6rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.scan-item-notes {
+  font-size: 0.8rem;
+  color: var(--d-muted);
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  border-radius: 6px;
+  padding: 0.45rem 0.65rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.scan-not-found {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem;
+  border: 2px solid var(--d-red);
+  border-radius: 12px;
+  animation: scanCardIn 0.2s ease;
+  gap: 0.4rem;
+}
+.scan-not-found .nf-icon { font-size: 2rem; }
+.scan-not-found h3 { font-size: 1.1rem; font-weight: 700; color: var(--d-red); margin: 0; }
+.scan-not-found p  { font-size: 0.8rem; color: var(--d-muted); margin: 0; }
+
+/* Scan status strip */
+.scan-status {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.72rem; color: var(--d-muted);
+  font-family: var(--d-mono);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 0.3rem 0;
+}
+.scan-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--d-muted); flex-shrink: 0;
+}
+.scan-dot.live  { background: var(--d-green); animation: sdBlink 1.5s infinite; }
+.scan-dot.found { background: var(--d-accent); }
+.scan-dot.error { background: var(--d-red); }
+@keyframes sdBlink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+</style>
+
+<div class="d-modal" id="scanModal" onclick="if(event.target === this) closeScanModal();">
+  <div class="d-modal-box" style="max-width:820px;width:95vw;" onclick="event.stopPropagation();">
+    <div class="d-modal-header">
+      <div class="d-modal-title">📷 Barcode &amp; QR Scanner</div>
+      <button type="button" class="d-modal-close" onclick="closeScanModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="d-modal-body">
+
+      <div class="scan-layout">
+
+        <!-- LEFT: camera -->
+        <div class="scan-cam-col">
+          <!-- Viewport wrapper — reticle is a sibling so library can't destroy it -->
+          <div style="position:relative;margin-bottom:0.6rem;">
+            <div id="scanReticleWrap" style="display:none;position:absolute;inset:0;z-index:10;align-items:center;justify-content:center;pointer-events:none;">
+              <div class="d-scan-reticle"><div class="d-scan-line"></div></div>
+            </div>
+            <div class="d-scan-viewport" id="scanViewport" style="min-height:220px;"></div>
+          </div>
+
+          <!-- Status -->
+          <div class="scan-status">
+            <div class="scan-dot" id="scanDot"></div>
+            <span id="scanStatusText">Camera off</span>
+          </div>
+
+          <!-- Camera buttons -->
+          <div style="display:flex;gap:0.5rem;margin-bottom:0.875rem;">
+            <button onclick="startScan()" class="d-btn d-btn-primary" id="scanStartBtn" style="flex:1;">
+              <i class="fas fa-camera"></i> Start Camera
+            </button>
+            <button onclick="stopScan()" class="d-btn d-btn-ghost" id="scanStopBtn" style="display:none;flex:1;">
+              <i class="fas fa-stop"></i> Stop
+            </button>
+          </div>
+
+          <!-- Manual entry -->
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;color:var(--d-muted);font-size:0.75rem;">
+            <div style="flex:1;height:1px;background:var(--d-border);"></div>
+            or enter manually
+            <div style="flex:1;height:1px;background:var(--d-border);"></div>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <input type="text" id="scanManualInput" class="d-form-input" placeholder="Barcode or QR URL…"
+                   style="flex:1;" onkeypress="if(event.key==='Enter')scanManualLookup()">
+            <button onclick="scanManualLookup()" class="d-btn d-btn-primary">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT: result -->
+        <div class="scan-result-col" id="scanResult">
+          <div class="scan-idle-msg">
+            <div class="idle-icon">🎯</div>
+            <strong>Ready to scan</strong>
+            <span>Start the camera and point at a barcode or QR code — the item will appear here without stopping the camera.</span>
+          </div>
+        </div>
+
+      </div><!-- .scan-layout -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ IMAGE VIEWER ══════════ -->
+<div class="d-modal" id="imgViewer" onclick="closeModal('imgViewer')">
+  <div style="text-align:center;padding:2rem;">
+    <img id="imgViewerSrc" src="" alt=""
+         style="max-width:90vw;max-height:85vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+  </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+/* ── Data ── */
+let allEquipment = {{ equipment_json | tojson }};
+let filtered     = [...allEquipment];
+let sortCol      = 'name';
+let sortDir      = 1;
+let currentPage  = 1;
+let pageSize     = 25;
+
+let photoModalId   = null;
+let photoModalType = 'item';
+let isScanning     = false;
+let html5QrCodeScanner = null;
+let lastScannedCode    = null;
+let scanDebounceTimer  = null;
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', () => {
+  buildFilters();
+  computeStats();
+  applyFilters();
+
+  document.getElementById('desktopSearch').addEventListener('input', () => {
+    currentPage = 1;
+    applyFilters();
+  });
+});
+
+/* ── Stats ── */
+function computeStats() {
+  const cats = new Set(allEquipment.map(e => e.category).filter(Boolean));
+  const locs = new Set(allEquipment.map(e => e.location).filter(Boolean));
+  const qty  = allEquipment.reduce((s,e) => s + (e.quantity_owned || 1), 0);
+  document.getElementById('statCats').textContent = cats.size;
+  document.getElementById('statQty').textContent  = qty;
+  document.getElementById('statLocs').textContent = locs.size;
+}
+
+/* ── Build filters ── */
+function buildFilters() {
+  const cats = [...new Set(allEquipment.map(e => e.category).filter(Boolean).sort())];
+  const locs = [...new Set(allEquipment.map(e => e.location).filter(Boolean).sort())];
+  const catSel = document.getElementById('catFilter');
+  const locSel = document.getElementById('locFilter');
+  cats.forEach(c => { const o = new Option(c,c); catSel.add(o); });
+  locs.forEach(l => { const o = new Option(l,l); locSel.add(o); });
+}
+
+/* ── Filter + sort ── */
+function applyFilters() {
+  const q   = document.getElementById('desktopSearch').value.trim().toLowerCase();
+  const cat = document.getElementById('catFilter').value;
+  const loc = document.getElementById('locFilter').value;
+
+  filtered = allEquipment.filter(item => {
+    if (cat && item.category !== cat) return false;
+    if (loc && item.location !== loc) return false;
+    if (!q) return true;
+    return [item.name, item.barcode, item.category, item.location, item.notes]
+      .join(' ').toLowerCase().includes(q);
+  });
+
+  filtered.sort((a,b) => {
+    const av = (a[sortCol] || '').toString().toLowerCase();
+    const bv = (b[sortCol] || '').toString().toLowerCase();
+    if (sortCol === 'quantity_owned') return sortDir * ((a[sortCol]||0) - (b[sortCol]||0));
+    return sortDir * av.localeCompare(bv);
+  });
+
+  currentPage = 1;
+  renderTable();
+}
+
+/* ── Sort ── */
+function sortBy(col) {
+  if (sortCol === col) { sortDir *= -1; }
+  else { sortCol = col; sortDir = 1; }
+  document.querySelectorAll('.d-table th').forEach(th => th.classList.remove('sorted'));
+  document.querySelector(`[data-col="${col}"]`)?.classList.add('sorted');
+  renderTable();
+}
+
+/* ── Render ── */
+function renderTable() {
+  const tbody  = document.getElementById('equipTbody');
+  const empty  = document.getElementById('dEmpty');
+  const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
+
+  const start = (currentPage - 1) * pageSize;
+  const page  = pageSize >= 9999 ? filtered : filtered.slice(start, start + pageSize);
+
+  tbody.innerHTML = '';
+
+  if (filtered.length === 0) {
+    empty.style.display = 'block';
+    document.getElementById('dPageInfo').innerHTML = '';
+    document.getElementById('dPageBtns').innerHTML = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  page.forEach(item => {
+    const tr = document.createElement('tr');
+    const thumbHtml = item.picture_url
+      ? `<img src="${item.picture_url}" class="d-thumb" alt="${esc(item.name)}"
+             onclick="viewImage('${item.picture_url}','${esc(item.name)}')" loading="lazy">`
+      : `<div class="d-thumb-placeholder">📦</div>`;
+
+    const adminHtml = isAdmin ? `
+      <td>
+        <div class="d-row-actions">
+          <button class="d-row-btn edit"   onclick="editItem(${item.id})"  title="Edit"><i class="fas fa-pencil-alt"></i></button>
+          <button class="d-row-btn photo"  onclick="openPhotoModal(${item.id},'${esc(item.name)}',${item.picture_url?'true':'false'},'item')" title="Item photo"><i class="fas fa-camera"></i></button>
+          <button class="d-row-btn locpic" onclick="openPhotoModal(${item.id},'${esc(item.name)}',${item.location_picture_url?'true':'false'},'location')" title="Location photo"><i class="fas fa-map-marker-alt"></i></button>
+          <button class="d-row-btn del"    onclick="deleteItem(${item.id})" title="Delete"><i class="fas fa-trash"></i></button>
+        </div>
+      </td>` : '';
+
+    tr.innerHTML = `
+      <td>${thumbHtml}</td>
+      <td><a href="/equipment/${item.id}" class="d-item-name">${esc(item.name)}</a></td>
+      <td><span class="d-barcode">${esc(item.barcode)}</span></td>
+      <td><span class="d-qty">${item.quantity_owned || 1}</span></td>
+      <td>${item.category ? `<span class="d-cat-pill">${esc(item.category)}</span>` : '<span style="color:var(--d-muted)">—</span>'}</td>
+      <td>${item.location ? `<span class="d-location">📍 ${esc(item.location)}</span>` : '<span style="color:var(--d-muted)">—</span>'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--d-muted);font-size:0.82rem;" title="${esc(item.notes||'')}">${esc((item.notes||'').slice(0,60))}${(item.notes||'').length>60?'…':''}</td>
+      ${adminHtml}`;
+    tbody.appendChild(tr);
+  });
+
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = filtered.length;
+  const pages = pageSize >= 9999 ? 1 : Math.ceil(total / pageSize);
+  const start = Math.min((currentPage-1)*pageSize + 1, total);
+  const end   = Math.min(currentPage * pageSize, total);
+
+  document.getElementById('dPageInfo').innerHTML =
+    `Showing <b>${start}–${end}</b> of <b>${total}</b> items`;
+
+  const btnsWrap = document.getElementById('dPageBtns');
+  btnsWrap.innerHTML = '';
+
+  const prev = document.createElement('button');
+  prev.className = 'd-page-btn';
+  prev.textContent = '‹';
+  prev.disabled = currentPage === 1;
+  prev.onclick = () => { currentPage--; renderTable(); };
+  btnsWrap.appendChild(prev);
+
+  for (let i = 1; i <= pages; i++) {
+    if (pages > 7 && Math.abs(i - currentPage) > 2 && i !== 1 && i !== pages) {
+      if (i === currentPage - 3 || i === currentPage + 3) {
+        const dots = document.createElement('button');
+        dots.className = 'd-page-btn'; dots.textContent = '…'; dots.disabled = true;
+        btnsWrap.appendChild(dots);
+      }
+      continue;
+    }
+    const btn = document.createElement('button');
+    btn.className = 'd-page-btn' + (i === currentPage ? ' active' : '');
+    btn.textContent = i;
+    btn.onclick = (pg => () => { currentPage = pg; renderTable(); })(i);
+    btnsWrap.appendChild(btn);
+  }
+
+  const next = document.createElement('button');
+  next.className = 'd-page-btn';
+  next.textContent = '›';
+  next.disabled = currentPage === pages;
+  next.onclick = () => { currentPage++; renderTable(); };
+  btnsWrap.appendChild(next);
+}
+
+function setPageSize(v) { pageSize = parseInt(v); currentPage = 1; renderTable(); }
+
+/* ── CRUD ── */
+{% if current_user.is_admin %}
+function openAddModal() {
+  document.getElementById('addModalTitle').textContent = 'Add Equipment';
+  document.getElementById('editId').value = '';
+  ['fBarcode','fName','fCat','fLoc','fNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fQty').value = 1;
+  document.getElementById('fBarcode').readOnly = false;
+  openModal('addModal');
+}
+
+function editItem(id) {
+  const item = allEquipment.find(e => e.id === id);
+  if (!item) return;
+  document.getElementById('addModalTitle').textContent = 'Edit Equipment';
+  document.getElementById('editId').value     = id;
+  document.getElementById('fBarcode').value   = item.barcode;
+  document.getElementById('fBarcode').readOnly = true;
+  document.getElementById('fName').value      = item.name;
+  document.getElementById('fQty').value       = item.quantity_owned || 1;
+  document.getElementById('fCat').value       = item.category || '';
+  document.getElementById('fLoc').value       = item.location || '';
+  document.getElementById('fNotes').value     = item.notes || '';
+  openModal('addModal');
+}
+
+function submitEquipment() {
+  const id  = document.getElementById('editId').value;
+  const data = {
+    barcode:        document.getElementById('fBarcode').value.trim(),
+    name:           document.getElementById('fName').value.trim(),
+    quantity_owned: parseInt(document.getElementById('fQty').value) || 1,
+    category:       document.getElementById('fCat').value.trim(),
+    location:       document.getElementById('fLoc').value.trim(),
+    notes:          document.getElementById('fNotes').value.trim(),
+  };
+  if (!data.barcode || !data.name) { showToast('Barcode and Name are required', 'error'); return; }
+
+  const url = id ? `/equipment/update/${id}` : '/equipment/add';
+  fetch(url, { method: id ? 'PUT' : 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        closeModal('addModal');
+        showToast(id ? 'Equipment updated' : 'Equipment added', 'success');
+        setTimeout(() => location.reload(), 700);
+      } else { showToast(res.error || 'Failed to save', 'error'); }
+    });
+}
+
+function deleteItem(id) {
+  if (!confirm('Delete this item? This cannot be undone.')) return;
+  fetch(`/equipment/delete/${id}`, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) { showToast('Item deleted', 'success'); setTimeout(() => location.reload(), 600); }
+      else showToast(res.error || 'Failed to delete', 'error');
+    });
+}
+
+/* ── Photo modal ── */
+function openPhotoModal(id, name, hasPic, type) {
+  photoModalId   = id;
+  photoModalType = type;
+  const isLoc    = type === 'location';
+  document.getElementById('photoModalTitle').innerHTML =
+    isLoc ? '📍 Location Photo — ' + name : '📷 Item Photo — ' + name;
+  document.getElementById('photoUploadIcon').textContent = isLoc ? '📍' : '📷';
+
+  const wrap = document.getElementById('photoCurrentWrap');
+  const img  = document.getElementById('photoCurrentImg');
+  if (hasPic) {
+    img.src = (isLoc ? `/equipment/${id}/location-picture/view` : `/equipment/${id}/picture/view`) + `?t=${Date.now()}`;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+  document.getElementById('photoProgress').style.display = 'none';
+  openModal('photoModal');
+}
+
+function handlePhotoDrop(e) {
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) uploadPhoto(f);
+}
+
+function uploadPhoto(file) {
+  if (!file || !photoModalId) return;
+  document.getElementById('photoProgress').style.display = 'block';
+  const fd = new FormData();
+  fd.append('file', file);
+  const ep = photoModalType === 'location'
+    ? `/equipment/${photoModalId}/location-picture`
+    : `/equipment/${photoModalId}/picture`;
+  fetch(ep, { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(res => {
+      document.getElementById('photoProgress').style.display = 'none';
+      if (res.success) { showToast('Photo uploaded', 'success'); closeModal('photoModal'); setTimeout(() => location.reload(), 600); }
+      else showToast(res.error || 'Upload failed', 'error');
+    });
+}
+
+function deletePhoto() {
+  if (!confirm('Remove this photo?')) return;
+  const ep = photoModalType === 'location'
+    ? `/equipment/${photoModalId}/location-picture`
+    : `/equipment/${photoModalId}/picture`;
+  fetch(ep, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) { showToast('Photo removed', 'success'); closeModal('photoModal'); setTimeout(() => location.reload(), 600); }
+      else showToast(res.error || 'Failed', 'error');
+    });
+}
+{% endif %}
+
+/* ── CSV ── */
+function downloadCSVTemplate() {
+  const csv = ['barcode,name,quantity_owned,category,location,notes', 'EQ-001,Example Item,1,Lighting,Storage Room A,Optional notes'].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = 'equipment_template.csv'; a.click();
+}
+
+function importCSV(input) {
+  if (!input.files.length) return;
+  const status = document.getElementById('importStatus');
+  status.style.display = 'flex';
+  status.className = 'd-import-status alert-info';
+  status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing…';
+  const fd = new FormData();
+  fd.append('file', input.files[0]);
+  fetch('/equipment/import-csv', { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        status.style.background = 'rgba(16,185,129,0.1)';
+        status.style.border     = '1px solid rgba(16,185,129,0.3)';
+        status.style.color      = '#10b981';
+        status.innerHTML = `<i class="fas fa-check-circle"></i> Imported <strong>${res.imported}</strong> items, skipped ${res.skipped}`;
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        status.style.background = 'rgba(239,68,68,0.1)';
+        status.style.border     = '1px solid rgba(239,68,68,0.3)';
+        status.style.color      = '#ef4444';
+        status.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${res.error}`;
+      }
+    });
+  input.value = '';
+}
+
+function exportCSV() {
+  const rows = [['Barcode','Name','Qty','Category','Location','Notes']];
+  allEquipment.forEach(e => rows.push([e.barcode, e.name, e.quantity_owned||1, e.category||'', e.location||'', e.notes||'']));
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = `equipment_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+/* ── Scan modal ── */
+function openScanModal() {
+  var inp = document.getElementById('scanManualInput');
+  if (inp) inp.value = '';
+  resetScanResult();
+  setScanStatus('off', 'Camera off');
+  openModal('scanModal');
+}
+
+function resetScanResult() {
+  var res = document.getElementById('scanResult');
+  if (res) res.innerHTML = `
+    <div class="scan-idle-msg">
+      <div class="idle-icon">🎯</div>
+      <strong>Ready to scan</strong>
+      <span>Start the camera and point at a barcode or QR code — the item will appear here without stopping the camera.</span>
+    </div>`;
+}
+
+function setScanStatus(state, text) {
+  var dot = document.getElementById('scanDot');
+  var txt = document.getElementById('scanStatusText');
+  if (dot) { dot.className = 'scan-dot' + (state !== 'off' ? ' ' + state : ''); }
+  if (txt) txt.textContent = text;
+}
+
+function closeScanModal() {
+  stopScan();
+  clearTimeout(scanDebounceTimer);
+  lastScannedCode = null;
+  closeModal('scanModal');
+}
+
+function setEl(id, prop, val) {
+  // Null-safe element style setter
+  var el = document.getElementById(id);
+  if (el) el.style[prop] = val;
+}
+
+function startScan() {
+  if (isScanning) return;
+
+  setEl('scanStartBtn',    'display', 'none');
+  setEl('scanStopBtn',     'display', 'flex');
+  setEl('scanReticleWrap', 'display', 'flex');
+  setScanStatus('live', 'Starting camera…');
+
+  // Always create a fresh instance targeting the viewport div
+  // (the library may have cleared it on a previous stop)
+  try {
+    html5QrCodeScanner = new Html5Qrcode('scanViewport');
+  } catch(e) {
+    showToast('Scanner init failed', 'error');
+    resetScanUI();
+    return;
+  }
+
+  var config = {
+    fps: 15,
+    qrbox: function(w, h) {
+      var edge = Math.floor(Math.min(w, h) * 0.8);
+      return { width: edge, height: edge };
+    }
+  };
+
+  html5QrCodeScanner.start(
+    { facingMode: 'environment' },
+    config,
+    function(decodedText) {
+      if (!decodedText) return;
+      // Debounce: ignore repeated fires of the same code within 2.5s
+      if (decodedText === lastScannedCode) return;
+      lastScannedCode = decodedText;
+      scanDebounceTimer = setTimeout(function() { lastScannedCode = null; }, 2500);
+      try { navigator.vibrate && navigator.vibrate(60); } catch(e){}
+      setScanStatus('found', 'Item found');
+      lookupBarcode(decodedText);
+    }
+  ).then(function() {
+    isScanning = true;
+    setScanStatus('live', 'Camera live — scanning…');
+  }).catch(function() {
+    showToast('Camera unavailable — check permissions', 'error');
+    resetScanUI();
+  });
+}
+
+function stopScan() {
+  if (html5QrCodeScanner && isScanning) {
+    isScanning = false;
+    try { html5QrCodeScanner.stop().catch(function(){}); } catch(e) {}
+  }
+  clearTimeout(scanDebounceTimer);
+  lastScannedCode = null;
+  resetScanUI();
+}
+
+function resetScanUI() {
+  setEl('scanStartBtn',    'display', 'flex');
+  setEl('scanStopBtn',     'display', 'none');
+  setEl('scanReticleWrap', 'display', 'none');
+  setScanStatus('off', 'Camera off');
+}
+
+function scanManualLookup() {
+  const v = document.getElementById('scanManualInput').value.trim();
+  if (!v) { showToast('Enter a barcode or paste QR URL', 'error'); return; }
+  setScanStatus('live', 'Looking up…');
+  lookupBarcode(v);
+}
+
+function equipmentIdFromScanInput(code) {
+  const s = (code || '').trim();
+  const m = s.match(/\/equipment\/(\d+)(?:\/view)?(?:\?|$)/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+function lookupBarcode(code) {
+  const res = document.getElementById('scanResult');
+  res.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;color:var(--d-muted);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i></div>`;
+
+  const equipmentId = equipmentIdFromScanInput(code);
+  const url = equipmentId != null
+    ? `/equipment/${equipmentId}/json`
+    : `/equipment/barcode/${encodeURIComponent(code)}`;
+
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        setScanStatus('error', 'Not found');
+        res.innerHTML = `
+          <div class="scan-not-found">
+            <div class="nf-icon">❌</div>
+            <h3>Not Found</h3>
+            <p>No item matched:<br><code style="font-size:0.75rem;">${esc(code)}</code></p>
+          </div>`;
+        return;
+      }
+
+      setScanStatus('found', 'Item found — camera still running');
+
+      const photoHtml = data.picture_url
+        ? `<img class="scan-item-photo" src="${esc(data.picture_url)}"
+               alt="${esc(data.name)}" onclick="viewImage('${esc(data.picture_url)}','${esc(data.name)}')">`
+        : `<div class="scan-item-photo-placeholder">📦</div>`;
+
+      const descHtml = data.description
+        ? `<div class="scan-item-desc">${esc(data.description)}</div>`
+        : '';
+
+      const notesHtml = data.notes
+        ? `<div class="scan-item-notes">📝 ${esc(data.notes)}</div>`
+        : '';
+
+      res.innerHTML = `
+        <div class="scan-item-card">
+          ${photoHtml}
+          <div class="scan-item-body">
+            <div class="scan-item-name">${esc(data.name)}</div>
+            <div class="scan-item-chips">
+              ${data.category ? `<span class="scan-chip scan-chip-cat">🏷 ${esc(data.category)}</span>` : ''}
+              ${data.location ? `<span class="scan-chip scan-chip-loc">📍 ${esc(data.location)}</span>` : ''}
+              <span class="scan-chip scan-chip-qty">× ${data.quantity_owned || 1}</span>
+            </div>
+            ${descHtml}
+            ${notesHtml}
+            <a href="/equipment/${data.id}" target="_blank"
+               style="display:flex;align-items:center;justify-content:center;gap:0.4rem;width:100%;
+                      background:var(--d-accent);color:#fff;text-decoration:none;border-radius:8px;
+                      padding:0.6rem 1rem;font-size:0.875rem;font-weight:700;letter-spacing:0.02em;
+                      transition:opacity 0.15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+              Open Item Page <i class="fas fa-external-link-alt" style="font-size:0.75rem;"></i>
+            </a>
+          </div>
+        </div>`;
+    })
+    .catch(function() {
+      setScanStatus('error', 'Lookup failed');
+      res.innerHTML = `<div class="scan-not-found"><div class="nf-icon">⚠️</div><h3>Error</h3><p>Could not reach server.</p></div>`;
+    });
+}
+
+/* ── Image viewer ── */
+function viewImage(url, name) {
+  document.getElementById('imgViewerSrc').src = url;
+  openModal('imgViewer');
+}
+
+/* ── Modal helpers ── */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  var scanM = document.getElementById('scanModal');
+  if (scanM && scanM.classList.contains('open')) {
+    closeScanModal();
+    return;
+  }
+  document.querySelectorAll('.d-modal.open').forEach(m => m.classList.remove('open'));
+});
+
+/* ── Toast ── */
+let toastTimer;
+function showToast(msg, type='success') {
+  const ex = document.getElementById('dToast');
+  if (ex) ex.remove();
+  clearTimeout(toastTimer);
+  const t = document.createElement('div');
+  t.id = 'dToast';
+  t.className = `d-toast ${type}`;
+  t.innerHTML = `<div class="d-toast-dot"></div>${msg}`;
+  document.body.appendChild(t);
+  toastTimer = setTimeout(() => t?.remove(), 3000);
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(s||''));
+  return d.innerHTML;
+}
+</script>
+{% endblock %}

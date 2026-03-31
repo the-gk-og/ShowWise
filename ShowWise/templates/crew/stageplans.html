@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Stage Plans - ShowWise{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <h2>🎨 Stage Plans</h2>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{{ url_for('stage_designer.stage_designer') }}" class="btn btn-primary">
+                <i class="fas fa-drafting-compass"></i> Open Designer
+            </a>
+            <button onclick="showModal('uploadModal')" class="btn btn-success">
+                <i class="fas fa-upload"></i> Upload File
+            </button>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label>Filter by Event:</label>
+        <select id="eventFilter" onchange="window.location.href='/stageplans?event_id='+this.value">
+            <option value="">All Plans</option>
+            {% for event in events %}
+            <option value="{{ event.id }}" {% if current_event and current_event.id == event.id %}selected{% endif %}>
+                {{ event.title }} - {{ event.event_date.strftime('%b %d, %Y') }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    {% if current_event %}
+    <div style="background: #e8f4f8; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+        <strong>Event:</strong> {{ current_event.title }}<br>
+        <strong>Date:</strong> {{ current_event.event_date.strftime('%B %d, %Y at %I:%M %p') }}
+    </div>
+    {% endif %}
+    
+    {% if plans %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+        {% for plan in plans %}
+        <div class="card" style="padding: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                <h3 style="margin: 0;">{{ plan.title }}</h3>
+                {% if plan.filename.startswith('designer_thumb_') %}
+                <span style="background: #6366f1; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                    <i class="fas fa-drafting-compass"></i> Designer
+                </span>
+                {% endif %}
+            </div>
+            
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                Uploaded by {{ plan.uploaded_by }} on {{ plan.created_at.strftime('%b %d, %Y') }}
+            </p>
+            
+            {# Display thumbnail for designer plans or regular images #}
+            {% if plan.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')) %}
+            <img src="{{ url_for('stage_designer.uploaded_file', filename=plan.filename) }}" 
+                 alt="{{ plan.title }}" 
+                 style="width: 100%; height: 200px; object-fit: contain; background: #f5f5f5; border-radius: 6px; margin-bottom: 1rem; cursor: pointer; border: 2px solid #e5e7eb;"
+                 onclick="showImageModal('{{ url_for('stage_designer.uploaded_file', filename=plan.filename) }}', '{{ plan.title }}')">
+            {% else %}
+            <div style="background: #f0f0f0; padding: 2rem; text-align: center; border-radius: 6px; margin-bottom: 1rem;">
+                <p style="font-size: 3rem;">📄</p>
+                <p>{{ plan.filename }}</p>
+            </div>
+            {% endif %}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+                {% if plan.filename.startswith('designer_thumb_') %}
+                {# For designer plans, try to find the design ID from the StagePlanDesign table #}
+                {# We'll need to add a helper route for this #}
+                <button onclick="openDesignerPlan('{{ plan.filename }}')" 
+                   class="btn btn-primary" 
+                   style="text-align: center; padding: 0.5rem; font-size: 0.85rem;"
+                   title="Edit in Designer">
+                    <i class="fas fa-edit"></i>
+                </button>
+                {% else %}
+                <a href="{{ url_for('stage_designer.stage_designer') }}" 
+                   class="btn btn-primary" 
+                   style="text-align: center; padding: 0.5rem; font-size: 0.85rem;"
+                   title="Open Designer">
+                    <i class="fas fa-drafting-compass"></i>
+                </a>
+                {% endif %}
+                
+                {% if not plan.filename.startswith('designer_thumb_') %}
+                <a href="{{ url_for('stage_designer.uploaded_file', filename=plan.filename) }}" 
+                   download="{{ plan.filename }}" 
+                   class="btn btn-success" 
+                   style="text-align: center; padding: 0.5rem; font-size: 0.85rem;"
+                   title="Download">
+                    <i class="fas fa-download"></i>
+                </a>
+                {% else %}
+                <a href="{{ url_for('stage_designer.uploaded_file', filename=plan.filename) }}" 
+                   download="{{ plan.filename }}" 
+                   class="btn btn-success" 
+                   style="text-align: center; padding: 0.5rem; font-size: 0.85rem;"
+                   title="Download Preview">
+                    <i class="fas fa-download"></i>
+                </a>
+                {% endif %}
+                
+                <button onclick="deletePlan({{ plan.id }})" 
+                        class="btn btn-danger" 
+                        style="padding: 0.5rem; font-size: 0.85rem;"
+                        title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 3rem; color: #9ca3af;">
+        <i class="fas fa-drafting-compass" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+        <h3 style="margin-bottom: 0.5rem;">No Stage Plans Yet</h3>
+        <p>Create your first stage plan using the designer or upload an existing file</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+            <a href="{{ url_for('stage_designer.stage_designer') }}" class="btn btn-primary">
+                <i class="fas fa-drafting-compass"></i> Open Designer
+            </a>
+            <button onclick="showModal('uploadModal')" class="btn btn-success">
+                <i class="fas fa-upload"></i> Upload File
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Upload Modal -->
+<div id="uploadModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="hideModal('uploadModal')">&times;</span>
+        <h2><i class="fas fa-upload"></i> Upload Stage Plan</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Title *</label>
+                <input type="text" name="title" id="title" required>
+            </div>
+            <div class="form-group">
+                <label>Assign to Event (Optional)</label>
+                <select name="event_id" id="eventId">
+                    <option value="">No specific event</option>
+                    {% for event in events %}
+                    <option value="{{ event.id }}" {% if current_event and current_event.id == event.id %}selected{% endif %}>
+                        {{ event.title }} - {{ event.event_date.strftime('%b %d, %Y') }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>File * (Images, PDFs accepted)</label>
+                <input type="file" name="file" id="file" required accept="image/*,.pdf">
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button type="button" onclick="hideModal('uploadModal')" class="btn" style="background: #6b7280; color: white;">Cancel</button>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-upload"></i> Upload
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Image Preview Modal -->
+<div id="imageModal" class="modal">
+    <div class="modal-content" style="max-width: 90%; max-height: 90vh;">
+        <span class="close" onclick="hideModal('imageModal')">&times;</span>
+        <h2 id="imageTitle" style="margin-bottom: 1rem;"></h2>
+        <img id="imagePreview" src="" alt="" style="width: 100%; height: auto; border-radius: 6px;">
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+    
+    fetch('/stageplans/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(result => {
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('Upload failed: ' + (result.error || 'Unknown error'));
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
+        }
+    })
+    .catch(err => {
+        alert('Upload failed: ' + err.message);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
+    });
+});
+
+function showImageModal(src, title) {
+    document.getElementById('imagePreview').src = src;
+    document.getElementById('imageTitle').textContent = title;
+    showModal('imageModal');
+}
+
+function openDesignerPlan(filename) {
+    // Extract timestamp from filename to find matching design
+    // Filename format: designer_thumb_1234567890_name.png
+    const parts = filename.split('_');
+    if (parts.length >= 3) {
+        const timestamp = parts[2];
+        // Fetch designs and find one with matching timestamp in thumbnail
+        fetch('/stage-designer/designs')
+            .then(r => r.json())
+            .then(designs => {
+                const matchingDesign = designs.find(d => d.thumbnail && d.thumbnail.includes(timestamp));
+                if (matchingDesign) {
+                    window.location.href = `/stage-designer?design_id=${matchingDesign.id}`;
+                } else {
+                    showAlert('Could not find matching design', 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Error finding design:', err);
+                showAlert('Error opening designer', 'error');
+            });
+    }
+}
+
+function deletePlan(id) {
+    if (!confirm('Delete this stage plan? This cannot be undone.')) return;
+    
+    fetch(`/stageplans/delete/${id}`, {method: 'DELETE'})
+        .then(r => r.json())
+        .then(result => {
+            if (result.success) {
+                showAlert('Stage plan deleted');
+                setTimeout(() => location.reload(), 1000);
+            }
+        });
+}
+
+function showAlert(message, type = 'success') {
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+    document.querySelector('.main-content').insertBefore(alert, document.querySelector('.main-content').firstChild);
+    setTimeout(() => alert.remove(), 3000);
+}
+</script>
+{% endblock %}

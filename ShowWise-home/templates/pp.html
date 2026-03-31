@@ -1,0 +1,105 @@
+{% extends "base_alt.html" %}
+{% block title %}Privacy Policy — ShowWise{% endblock %}
+{% block head %}
+<style>
+  main { padding: 5rem 2rem !important; max-width: 900px !important; }
+
+  .pp-hero{text-align:center;margin-bottom:4rem;}
+  .pp-tag{display:inline-block;background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.2);color:var(--blue);padding:0.375rem 1rem;border-radius:100px;font-size:0.775rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:1.5rem;}
+  .pp-hero h1{font-size:clamp(2rem,3.5vw,2.75rem);font-weight:800;color:var(--ink);letter-spacing:-0.04em;margin-bottom:0.75rem;}
+  .pp-hero p{font-size:0.9375rem;color:var(--text-muted);}
+
+  .pp-body{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:3rem;box-shadow:var(--shadow-sm);}
+  .pp-body h2{font-size:1.125rem;font-weight:800;color:var(--ink);letter-spacing:-0.015em;margin-top:2.5rem;margin-bottom:0.875rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.625rem;}
+  .pp-body h2:first-child{margin-top:0;}
+  .pp-body h2::before{content:'';display:block;width:4px;height:18px;background:linear-gradient(180deg,var(--blue),var(--teal));border-radius:2px;}
+  .pp-body p{font-size:0.9375rem;color:var(--text-muted);line-height:1.8;margin-bottom:1rem;}
+  .pp-body ul{margin:0 0 1rem 1.25rem;}
+  .pp-body ul li{font-size:0.9375rem;color:var(--text-muted);line-height:1.8;margin-bottom:0.3rem;}
+  .pp-body a{color:var(--blue);text-decoration:none;font-weight:500;}
+  .pp-body a:hover{text-decoration:underline;}
+  .pp-body strong{color:var(--text);font-weight:600;}
+  .pp-date{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);padding:0.75rem 1.25rem;margin-bottom:2rem;font-size:0.875rem;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem;}
+  .pp-date i{color:var(--blue);}
+
+  @media(max-width:768px){main{padding:3rem 1.25rem !important;}.pp-body{padding:2rem 1.5rem;}}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<div class="pp-hero">
+  <div class="pp-tag">Legal</div>
+  <h1>Privacy Policy</h1>
+  <p>Your data, your rights — read how we handle information at ShowWise.</p>
+</div>
+
+<div class="pp-body">
+  <div class="pp-date"><i class="fas fa-calendar-check"></i> Effective Date: 29 October 2025</div>
+
+  <h2>1. Introduction</h2>
+  <p>ShowWise is a production management platform designed for creative teams, schools, and crew coordination. This Privacy Policy explains how we collect, use, and protect your information when you use our website, services, and Discord bot.</p>
+
+  <h2>2. Information We Collect</h2>
+  <ul>
+    <li><strong>Discord Data:</strong> Discord User ID, Username, Display Name, Server ID</li>
+    <li><strong>Personal Info:</strong> Username, email (optional), password hash, user role, admin status, account creation time</li>
+    <li><strong>Usage Data:</strong> IP address, browser type, device info, pages visited, referral URLs</li>
+    <li><strong>Cookies:</strong> Used to improve experience; manageable via your browser settings</li>
+    <li><strong>Infrastructure:</strong> Cloudflare handles traffic routing and security. See <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">Cloudflare's Privacy Policy</a>.</li>
+  </ul>
+
+  <h2>3. How We Use Your Information</h2>
+  <ul>
+    <li>Authenticate and manage users securely</li>
+    <li>Provide personalised bot features and platform functionality</li>
+    <li>Improve platform performance and user experience</li>
+    <li>Send relevant updates and support communications</li>
+    <li>Comply with legal obligations</li>
+  </ul>
+
+  <h2>4. Account Creation and School Use</h2>
+  <p>Accounts can only be created by authorised organisation administrators. Schools are responsible for obtaining parental consent before onboarding users under 13.</p>
+
+  <h2>5. Children's Privacy</h2>
+  <p>ShowWise is intended for users aged 13 and older. We do not knowingly collect data from children under 13 without verified parental or school consent. If you believe a child has been onboarded without authorisation, contact us at <a href="mailto:info@showwise.app">info@showwise.app</a>.</p>
+
+  <h2>6. Sharing Your Information</h2>
+  <p>We do not sell your personal or Discord data. We may share information with:</p>
+  <ul>
+    <li>Trusted service providers (e.g., hosting, analytics)</li>
+    <li>Legal authorities when required by law</li>
+    <li>Business partners only with your explicit consent</li>
+  </ul>
+
+  <h2>7. Data Security</h2>
+  <p>We implement industry-standard security measures including TLS encryption, password hashing, and role-based access controls. We also support two-factor authentication (2FA) and OAuth 2.0 to protect user accounts. However, no method of transmission over the internet is 100% secure.</p>
+
+  <h2>8. Data Retention</h2>
+  <p>We retain user data only as long as necessary to provide services and comply with legal obligations. You may request deletion of your data by contacting us.</p>
+
+  <h2>9. Your Rights</h2>
+  <p>Depending on your location, you may have the right to:</p>
+  <ul>
+    <li>Access the personal data we hold about you</li>
+    <li>Request correction or deletion of your data</li>
+    <li>Object to or restrict how we process your information</li>
+    <li>Withdraw consent at any time</li>
+  </ul>
+  <p>To exercise these rights, contact us at <a href="mailto:info@showwise.app">info@showwise.app</a>.</p>
+
+  <h2>10. Third-Party Links</h2>
+  <p>Our website may contain links to third-party sites. We are not responsible for their privacy practices or content. We encourage you to review their policies before providing any personal information.</p>
+
+  <h2>11. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated effective date. Continued use of ShowWise after changes indicates acceptance of the revised policy.</p>
+
+  <h2>12. Contact Us</h2>
+  <p>
+    <strong>Email:</strong> <a href="mailto:info@showwise.app">info@showwise.app</a><br>
+    <strong>Website:</strong> <a href="https://showwise.app" target="_blank">https://showwise.app</a>
+  </p>
+</div>
+
+{% endblock %}

@@ -1,0 +1,15 @@
+/**
+ * Logo Sizing Options:
+ * 
+ * logo_size:
+ *   - "contain" - Fits entire logo within box, maintains aspect ratio (good for logos with padding/whitespace)
+ *   - "cover" - Fills entire box, may crop edges (good for full-bleed logos)
+ *   - "80%" - Specific percentage (e.g., "60%", "90%")
+ *   - "50px" - Specific pixel size
+ * 
+ * logo_padding:
+ *   - "0px" - No padding (logo touches edges)
+ *   - "8px" - Small padding
+ *   - "12px" - Medium padding (recommended)
+ *   - "20px" - Large padding (for logos that need breathing room)
+ */
