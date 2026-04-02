@@ -1,0 +1,308 @@
+# ShowWise - Docker Compose Stack for Dockge
+# Production-ready deployment with 3 separate PostgreSQL databases
+# All volumes stored on NAS at /mnt/NAS/showwise/
+
+services:
+  # ============================================================
+  # PostgreSQL Database 1 - Security Database
+  # ============================================================
+  security-db:
+    image: postgres:16-alpine
+    container_name: showwise-security-db
+    environment:
+      POSTGRES_USER: ${SECURITY_DB_USER}
+      POSTGRES_PASSWORD: ${SECURITY_DB_PASSWORD}
+      POSTGRES_DB: ${SECURITY_DB_NAME}
+      POSTGRES_INITDB_ARGS: "-c shared_buffers=256MB -c max_connections=100"
+    volumes:
+      - /mnt/NAS/showwise/data/security-db:/var/lib/postgresql/data
+    ports:
+      - "5432:7000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SECURITY_DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - showwise-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================================
+  # PostgreSQL Database 2 - Organization Database
+  # Stores: Organizations, crews, equipment, venues
+  # ============================================================
+  organization-db:
+    image: postgres:16-alpine
+    container_name: showwise-organization-db
+    environment:
+      POSTGRES_USER: ${ORG_DB_USER}
+      POSTGRES_PASSWORD: ${ORG_DB_PASSWORD}
+      POSTGRES_DB: ${ORG_DB_NAME}
+      POSTGRES_INITDB_ARGS: "-c shared_buffers=256MB -c max_connections=100"
+    volumes:
+      - /mnt/NAS/showwise/data/organization-db:/var/lib/postgresql/data
+    ports:
+      - "5433:7001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ORG_DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - showwise-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================================
+  # PostgreSQL Database 3 - WebApp Database
+  # Stores: Users, events, bookings, main application data
+  # ============================================================
+  webapp-db:
+    image: postgres:16-alpine
+    container_name: showwise-webapp-db
+    environment:
+      POSTGRES_USER: ${WEBAPP_DB_USER}
+      POSTGRES_PASSWORD: ${WEBAPP_DB_PASSWORD}
+      POSTGRES_DB: ${WEBAPP_DB_NAME}
+      POSTGRES_INITDB_ARGS: "-c shared_buffers=512MB -c max_connections=150"
+    volumes:
+      - /mnt/NAS/showwise/data/webapp-db:/var/lib/postgresql/data
+    ports:
+      - "5434:7002"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${WEBAPP_DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - showwise-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================================
+  # Redis Cache - Rate limiting, sessions, and caching
+  # ============================================================
+  redis:
+    image: redis:7-alpine
+    container_name: showwise-redis
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - /mnt/NAS/showwise/data/redis:/data
+    ports:
+      - "6379:50003"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - showwise-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================================
+  # Security Backend - Central threat management & validation
+  # Database: security-db
+  # ============================================================
+  security-backend:
+    build:
+      context: /path/to/ShowWise-SecurityBackend
+      dockerfile: Dockerfile
+    container_name: showwise-security-backend
+    environment:
+      FLASK_ENV: ${FLASK_ENV}
+      SECRET_KEY: ${SECURITY_BACKEND_SECRET_KEY}
+      DATABASE_URL: postgresql://${SECURITY_DB_USER}:${SECURITY_DB_PASSWORD}@security-db:5432/${SECURITY_DB_NAME}
+      API_INTEGRATION_KEY: ${API_INTEGRATION_KEY}
+      API_INTEGRATION_SECRET: ${API_INTEGRATION_SECRET}
+      ADMIN_API_KEY: ${ADMIN_API_KEY}
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "5001:7001"
+    depends_on:
+      security-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - showwise-net
+    volumes:
+      - /mnt/NAS/showwise/logs/security-backend:/app/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  # ============================================================
+  # ShowWise Main App - Primary application with auth & events
+  # Database: webapp-db
+  # ============================================================
+  showwise-main:
+    build:
+      context: /path/to/ShowWise
+      dockerfile: Dockerfile
+    container_name: showwise-main
+    environment:
+      FLASK_ENV: ${FLASK_ENV}
+      SECRET_KEY: ${SHOWWISE_MAIN_SECRET_KEY}
+      DATABASE_URL: postgresql://${WEBAPP_DB_USER}:${WEBAPP_DB_PASSWORD}@webapp-db:5432/${WEBAPP_DB_NAME}
+      SECURITY_BACKEND_URL: http://security-backend:5000
+      API_INTEGRATION_KEY: ${API_INTEGRATION_KEY}
+      API_INTEGRATION_SECRET: ${API_INTEGRATION_SECRET}
+      APP_INSTANCE_NAME: main
+      CLOUDFLARE_TURNSTILE_SITE_KEY: ${CLOUDFLARE_TURNSTILE_SITE_KEY}
+      CLOUDFLARE_TURNSTILE_SECRET_KEY: ${CLOUDFLARE_TURNSTILE_SECRET_KEY}
+      REDIS_URL: redis://redis:6379/1
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID}
+    ports:
+      - "5000:7000"
+    depends_on:
+      security-backend:
+        condition: service_healthy
+      webapp-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - showwise-net
+    volumes:
+      - /mnt/NAS/showwise/app/main/instance:/app/instance
+      - /mnt/NAS/showwise/app/main/uploads:/app/uploads
+      - /mnt/NAS/showwise/logs/main:/app/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  # ============================================================
+  # ShowWise Home - Public landing page & initial forms
+  # Database: webapp-db (read-only)
+  # ============================================================
+  showwise-home:
+    build:
+      context: /path/to/ShowWise-home
+      dockerfile: Dockerfile
+    container_name: showwise-home
+    environment:
+      FLASK_ENV: ${FLASK_ENV}
+      SECRET_KEY: ${SHOWWISE_HOME_SECRET_KEY}
+      SECURITY_BACKEND_URL: http://security-backend:5000
+      API_INTEGRATION_KEY: ${API_INTEGRATION_KEY}
+      API_INTEGRATION_SECRET: ${API_INTEGRATION_SECRET}
+      APP_INSTANCE_NAME: home
+      CLOUDFLARE_TURNSTILE_SITE_KEY: ${CLOUDFLARE_TURNSTILE_SITE_KEY}
+      CLOUDFLARE_TURNSTILE_SECRET_KEY: ${CLOUDFLARE_TURNSTILE_SECRET_KEY}
+      REDIS_URL: redis://redis:6379/2
+    ports:
+      - "5002:7002"
+    depends_on:
+      security-backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - showwise-net
+    volumes:
+      - /mnt/NAS/showwise/app/home/instance:/app/instance
+      - /mnt/NAS/showwise/logs/home:/app/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  # ============================================================
+  # ShowWise Backend - Original database & API backend
+  # Database: organization-db
+  # ============================================================
+  showwise-backend:
+    build:
+      context: /path/to/ShowWise-Backend
+      dockerfile: Dockerfile
+    container_name: showwise-backend
+    environment:
+      FLASK_ENV: ${FLASK_ENV}
+      SECRET_KEY: ${SHOWWISE_BACKEND_SECRET_KEY}
+      DATABASE_URL: postgresql://${ORG_DB_USER}:${ORG_DB_PASSWORD}@organization-db:5432/${ORG_DB_NAME}
+      SECURITY_BACKEND_URL: http://security-backend:5000
+      API_INTEGRATION_KEY: ${API_INTEGRATION_KEY}
+      API_INTEGRATION_SECRET: ${API_INTEGRATION_SECRET}
+      REDIS_URL: redis://redis:6379/3
+    ports:
+      - "5003:7003"
+    depends_on:
+      security-backend:
+        condition: service_healthy
+      organization-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - showwise-net
+    volumes:
+      - /mnt/NAS/showwise/app/backend/instance:/app/instance
+      - /mnt/NAS/showwise/logs/backend:/app/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+networks:
+  showwise-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
