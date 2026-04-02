@@ -127,7 +127,7 @@ services:
   # ============================================================
   security-backend:
     build:
-      context: /path/to/ShowWise-SecurityBackend
+      context: https://github.com/the-gk-og/ShowWise.git#main:ShowWise-SecurityBackend
       dockerfile: Dockerfile
     container_name: showwise-security-backend
     environment:
@@ -168,7 +168,7 @@ services:
   # ============================================================
   showwise-main:
     build:
-      context: /path/to/ShowWise
+      context: https://github.com/the-gk-og/ShowWise.git#main:ShowWise
       dockerfile: Dockerfile
     container_name: showwise-main
     environment:
@@ -218,7 +218,7 @@ services:
   # ============================================================
   showwise-home:
     build:
-      context: /path/to/ShowWise-home
+      context: https://github.com/the-gk-og/ShowWise.git#main:ShowWise-home
       dockerfile: Dockerfile
     container_name: showwise-home
     environment:
@@ -262,7 +262,7 @@ services:
   # ============================================================
   showwise-backend:
     build:
-      context: /path/to/ShowWise-Backend
+      context: https://github.com/the-gk-og/ShowWise.git#main:ShowWise-Backend
       dockerfile: Dockerfile
     container_name: showwise-backend
     environment:
